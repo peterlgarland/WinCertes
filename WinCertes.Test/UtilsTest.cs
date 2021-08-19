@@ -26,10 +26,14 @@ namespace WinCertes.Tests
         [TestMethod()]
         public void IsAdministratorTest()
         {
-            WindowsIdentity identity = WindowsIdentity.GetCurrent();
-            WindowsPrincipal principal = new WindowsPrincipal(identity);
-            if (principal.IsInRole(WindowsBuiltInRole.Administrator) != Utils.IsAdministrator()) {
-                Assert.Fail();
+            if (OperatingSystem.IsWindows())
+            {
+                WindowsIdentity identity = WindowsIdentity.GetCurrent();
+                WindowsPrincipal principal = new WindowsPrincipal(identity);
+                if (principal.IsInRole(WindowsBuiltInRole.Administrator) != Utils.IsAdministrator())
+                {
+                    Assert.Fail();
+                }
             }
         }
 

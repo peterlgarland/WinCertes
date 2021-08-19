@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -76,15 +77,31 @@ namespace WinCertes
         /// <param name="pfx"></param>
         /// <param name="pfxPassword"></param>
         /// <returns></returns>
-        public static bool ExecutePowerShell(string scriptFile, AuthenticatedPFX pfx)
+        public static bool ExecutePowerShell(string scriptFile, AuthenticatedPFX pfx, string executionPolicy)
         {
             if (scriptFile == null) return false;
             try
             {
                 // First let's create the execution runspace
-                RunspaceConfiguration runspaceConfiguration = RunspaceConfiguration.Create();
-                Runspace runspace = RunspaceFactory.CreateRunspace(runspaceConfiguration);
+                Runspace runspace = RunspaceFactory.CreateRunspace();
                 runspace.Open();
+
+                if (!string.IsNullOrEmpty(executionPolicy))
+                {
+                    // Create a new Pipeline to set the Execution Policy
+                    Pipeline execPolicyPipeline = runspace.CreatePipeline();
+
+                    // Now add the command 'Set-ExecutionPolicy' to the pipeline to ensure Scripts are allowed to run
+                    Command execPolicy = new Command("Set-ExecutionPolicy");
+                    CommandParameter policy = new CommandParameter("ExecutionPolicy", executionPolicy);
+                    execPolicy.Parameters.Add(policy);
+
+                    // add the created Command to the pipeline
+                    execPolicyPipeline.Commands.Add(execPolicy);
+
+                    // and we invoke it to set the Policy before trying to run the script
+                    execPolicyPipeline.Invoke();
+                }
 
                 // Now we create the pipeline
                 Pipeline pipeline = runspace.CreatePipeline();
@@ -121,7 +138,7 @@ namespace WinCertes
         /// <param name="certificate"></param>
         /// <param name="siteName"></param>
         /// <returns>true in case of success, false otherwise</returns>
-        public static bool BindCertificateForIISSite(X509Certificate2 certificate, string siteName, int port)
+        public static bool BindCertificateForIISSite(X509Certificate2 certificate, string siteName, int port, bool sni)
         {
             if (siteName == null) return false;
             try
@@ -153,6 +170,7 @@ namespace WinCertes
                     {
                         Binding binding = site.Bindings.Add("*:" + port + ":", certificate.GetCertHash(), "MY");
                         binding.Protocol = "https";
+                        if (sni) binding.SslFlags = SslFlags.Sni;
                         logger.Debug("Could not find binding, will try to create one on port " + port);
                     }
                 }
@@ -178,6 +196,7 @@ namespace WinCertes
                         {
                             Binding binding = site.Bindings.Add("*:443:" + sanDns, certificate.GetCertHash(), "MY");
                             binding.Protocol = "https";
+                            if (sni) binding.SslFlags = SslFlags.Sni;
                             logger.Debug("Could not find binding, will try to create one on port 443");
                         }
                     }
@@ -225,9 +244,14 @@ namespace WinCertes
         /// <returns>true if admin, false otherwise</returns>
         public static bool IsAdministrator()
         {
-            WindowsIdentity identity = WindowsIdentity.GetCurrent();
-            WindowsPrincipal principal = new WindowsPrincipal(identity);
-            return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            if (OperatingSystem.IsWindows())
+            {
+                WindowsIdentity identity = WindowsIdentity.GetCurrent();
+                WindowsPrincipal principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+            // false stops it from running on other OS', true allows, until we see if we even need root access on Linux
+            return false;
         }
 
         /// <summary>
@@ -247,9 +271,9 @@ namespace WinCertes
             config.LoggingRules.Add(
                 new LoggingRule("*", LogLevel.Info, new FileTarget
                 {
-                    FileName = logPath + "\\wincertes.log",
+                    FileName = Path.Combine(logPath, "wincertes.log"),
                     ArchiveAboveSize = 500000,
-                    ArchiveFileName = logPath + "\\wincertes.old.log",
+                    ArchiveFileName = Path.Combine(logPath, "wincertes.old.log"),
                     MaxArchiveFiles = 1,
                     ArchiveOldFileOnStartup = false,
                     Layout = "${longdate}|${level:uppercase=true}|${message}${onexception:${newline}${exception:format=tostring}}"

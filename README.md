@@ -5,7 +5,7 @@ WinCertes is a simple ACMEv2 Client for Windows, able to manage the automatic is
 ![GPLv3 License](https://www.gnu.org/graphics/gplv3-88x31.png)
 
 Requirements:
-- Windows Server 2008 R2 SP1 or higher (.Net 4.6.1 or higher), 64-bit
+- Windows with .NET 5.0 Runtime, 64-bit
 
 Features:
 - CLI-based for easy integration with DevOps
@@ -61,9 +61,15 @@ Command Line Options
                                to handle certificate renewal (default=no)
   -b, --bindname=VALUE       IIS site name to bind the certificate to, e.g. "
                                Default Web Site". Defaults to no binding.
+  -n, --bindport=N           IIS site port to bind the certificate to, e.g. 443. 
+                               Defaults to 443, used only if -b is specified.
+  -i, --sni                  add the Server Name Indicatation Ssl Flag when
+                               binding to IIS
   -f, --scriptfile=VALUE     PowerShell Script file e.g. "C:\Temp\script.ps1"
                                to execute upon successful enrollment (default=
                                none)
+  -x, --execpolicy=VALUE     Specify the Execution Policy to run the PowerShell 
+                               Script file e.g. Unrestricted (default=Undefined)
   -a, --standalone           should WinCertes create its own WebServer for
                                validation. Activates HTTP validation mode.
                                WARNING: it will use port 80 unless -l is
@@ -143,7 +149,7 @@ About IIS Configuration
 
 WinCertes can auto-configure IIS regarding the SSL certificate and its bindings (see below for more details). However, IIS configuration needs to be modified in order for 
 WinCertes HTTP validation to work: WinCertes requires the "\*" mimetype to be set, else IIS will refuse to serve the challenge file.
-WinCertes tries to do this automatically as well, but it might fail depending on your version and setup of IIS.
+WinCertes tries to do this automatically as well, but it might fail depending on your version and setup of IIS, check it fails before applying the fix.
 
 It is possible to fix the issue permanently:
 - using the IIS Management Console, in the "MIME Types" section

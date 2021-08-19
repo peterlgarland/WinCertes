@@ -4,6 +4,7 @@ using Certes.Acme.Resource;
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
@@ -237,7 +238,7 @@ namespace WinCertes
             // Let's prepare for ACME-DNS validation
             var dnsValue = _acme.AccountKey.DnsTxt(dnsChallenge.Token);
             var dnsKey = $"_acme-challenge.{domain}".Replace("*.", "");
-            if (!dnsChallengeValidator.PrepareChallengeForValidation(dnsKey, dnsValue)) return false;
+            if (!await dnsChallengeValidator.PrepareChallengeForValidationAsync(dnsKey, dnsValue)) return false;
 
             // We sleep 5 seconds gefore first check, in order to leave the time to DNS to propagate
             System.Threading.Thread.Sleep(5000);
@@ -374,7 +375,7 @@ namespace WinCertes
                 var key = certKey.ToPem();
                 pfx.AddIssuers(GetCACertChainFromStore());
                 var pfxBytes = pfx.Build(pfxFriendlyName, PfxPassword);
-                var fileName = pathForPfx + "\\" + Guid.NewGuid().ToString();
+                var fileName = Path.Combine(pathForPfx, Guid.NewGuid().ToString());
                 var pfxName = fileName + ".pfx";
                 var cerPath = fileName + ".cer";
                 var keyPath = fileName + ".key";

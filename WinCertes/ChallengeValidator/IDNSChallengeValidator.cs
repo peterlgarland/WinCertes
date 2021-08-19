@@ -17,6 +17,6 @@ namespace WinCertes.ChallengeValidator
         /// <param name="dnsKeyName">The DNS Key Name (in the form _acme-challenge.example.com)</param>
         /// <param name="dnsKeyValue">The DNS Key Value (TXT value of the former)</param>
         /// <returns></returns>
-        bool PrepareChallengeForValidation(string dnsKeyName, string dnsKeyValue);
+        Task<bool> PrepareChallengeForValidationAsync(string dnsKeyName, string dnsKeyValue);
     }
 }

@@ -20,9 +20,9 @@ namespace MSIPackaging
             var project = new Project("WinCertes",
                               new Dir(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + @"\WinCertes",
 #if DEBUG
-                                  new Files(path + @"\WinCertes\bin\Debug\*.*")
+                                  new Files(path + @"\WinCertes\bin\Debug\net5.0\*.*")
 #else
-                                  new Files(path + @"\WinCertes\bin\Release\*.*")
+                                  new Files(path + @"\WinCertes\bin\Release\net5.0\*.*")
 #endif
                                   ),
                               new RegValue(RegistryHive.LocalMachine, @"Software\WinCertes", "license", "GPLv3") { Win64 = true },
@@ -37,7 +37,7 @@ namespace MSIPackaging
                               }
                               );
             project.GUID = new Guid("bb0a8e11-24a8-4d7e-a7d6-6fc5bd8166d2");
-            project.Version = Version.Parse("1.4.3");
+            project.Version = Version.Parse("1.5.0");
             project.LicenceFile = path + @"\MSIPackaging\Resources\gpl-3.0.rtf";
             project.BannerImage = path + @"\MSIPackaging\Resources\banner.png";
             project.BackgroundImage = path + @"\MSIPackaging\Resources\background.png";

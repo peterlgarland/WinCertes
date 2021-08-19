@@ -28,13 +28,13 @@ namespace WinCertes.ChallengeValidator
             try {
                 // First we create necessary directories
                 // the well-known dir could have been created for other reasons
-                if (!System.IO.Directory.Exists($"{_challengeVerifyPath}\\.well-known")) {
+                if (!System.IO.Directory.Exists(Path.Combine(_challengeVerifyPath, ".well-known"))) {
                     noWellKnown = true;
-                    System.IO.Directory.CreateDirectory($"{_challengeVerifyPath}\\.well-known");
+                    System.IO.Directory.CreateDirectory(Path.Combine(_challengeVerifyPath, ".well-known"));
                 }
                 // we expect to be in charge of acme-challenge subdir
-                System.IO.Directory.CreateDirectory($"{_challengeVerifyPath}\\.well-known\\acme-challenge");
-                File.WriteAllText($"{_challengeVerifyPath}\\.well-known\\acme-challenge\\web.config", webConfig);
+                System.IO.Directory.CreateDirectory(Path.Combine(_challengeVerifyPath, ".well-known", "acme-challenge"));
+                File.WriteAllText(Path.Combine(_challengeVerifyPath, ".well-known", "acme-challenge", "web.config"), webConfig);
             } catch (Exception e) {
                 logger.Warn($"Could not create Directories for HTTP validation: {e.Message}");
             }
@@ -49,7 +49,7 @@ namespace WinCertes.ChallengeValidator
         {
             try {
                 // And we create the token validation file for the challenge
-                File.WriteAllText($"{_challengeVerifyPath}\\.well-known\\acme-challenge\\{token}", keyAuthz);
+                File.WriteAllText(Path.Combine(_challengeVerifyPath, ".well-known", "acme-challenge", token), keyAuthz);
                 return true;
             } catch (Exception e) {
                 logger.Error($"Could not write challenge file: {e.Message}");
@@ -65,7 +65,7 @@ namespace WinCertes.ChallengeValidator
         {
             try {
                 // Finally we delete file that we needed
-                File.Delete($"{_challengeVerifyPath}\\.well-known\\acme-challenge\\{token}");
+                File.Delete(Path.Combine(_challengeVerifyPath, ".well-known", "acme-challenge", token));
             } catch (Exception e) {
                 logger.Error($"Could not delete challenge file: {e.Message}");
             }
@@ -74,11 +74,11 @@ namespace WinCertes.ChallengeValidator
         public void EndAllChallengeValidations()
         {
             try {
-                File.Delete($"{_challengeVerifyPath}\\.well-known\\acme-challenge\\web.config");
+                File.Delete(Path.Combine(_challengeVerifyPath, ".well-known", "acme-challenge", "web.config"));
                 // Finally we delete all directories that we needed
-                System.IO.Directory.Delete($"{_challengeVerifyPath}\\.well-known\\acme-challenge");
+                System.IO.Directory.Delete(Path.Combine(_challengeVerifyPath, ".well-known", "acme-challenge"));
                 if (noWellKnown)
-                    System.IO.Directory.Delete($"{_challengeVerifyPath}\\.well-known");
+                    System.IO.Directory.Delete(Path.Combine(_challengeVerifyPath, ".well-known"));
             } catch (Exception e) {
                 logger.Warn($"Could not delete challenge file directory: {e.Message}");
             }

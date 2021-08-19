@@ -26,7 +26,7 @@ namespace WinCertes.ChallengeValidator
         /// <param name="dnsKeyName"></param>
         /// <param name="dnsKeyValue"></param>
         /// <returns></returns>
-        public bool PrepareChallengeForValidation(string dnsKeyName, string dnsKeyValue)
+        public async Task<bool> PrepareChallengeForValidationAsync(string dnsKeyName, string dnsKeyValue)
         {
             var DNSServerURL = _config.ReadStringParameter("DNSServerURL");
             var DNSServerUser = _config.ReadStringParameter("DNSServerUser");
@@ -38,7 +38,7 @@ namespace WinCertes.ChallengeValidator
             content.Headers.Add("X-Api-User", DNSServerUser);
             content.Headers.Add("X-Api-Key", DNSServerKey);
 
-            var response = client.PostAsync(DNSServerURL, content).Result;
+            var response = await client.PostAsync(DNSServerURL, content);
             return (response.StatusCode == System.Net.HttpStatusCode.OK);
         }
     }

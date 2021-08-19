@@ -91,5 +91,11 @@
         /// Deletes all WinCertes parameters from configuration
         /// </summary>
         void DeleteAllParameters();
+
+        /// <summary>
+        /// Gets the number of Extras in the configuration
+        /// </summary>
+        /// <returns>string list of the Extra numbers</returns>
+        string getExtrasConfigParams();
     }
 }

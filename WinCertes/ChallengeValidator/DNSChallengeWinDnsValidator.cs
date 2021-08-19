@@ -36,46 +36,53 @@ namespace WinCertes.ChallengeValidator
         /// <param name="dnsKeyName"></param>
         /// <param name="dnsKeyValue"></param>
         /// <returns></returns>
-        public bool PrepareChallengeForValidation(string dnsKeyName, string dnsKeyValue)
+        public async Task<bool> PrepareChallengeForValidationAsync(string dnsKeyName, string dnsKeyValue)
         {
-            ManagementScope mgmtScope = new ManagementScope(@"\\" + DNSServerHost + @"\Root\MicrosoftDNS");
-            if (DNSServerUser != null) mgmtScope.Options = LoginOptions();
-            mgmtScope.Connect();
+            if (OperatingSystem.IsWindows())
+            {
+                ManagementScope mgmtScope = new ManagementScope(@"\\" + DNSServerHost + @"\Root\MicrosoftDNS");
+                if (DNSServerUser != null) mgmtScope.Options = LoginOptions();
+                mgmtScope.Connect();
 
-            ManagementObjectSearcher mgmtSearch = new ManagementObjectSearcher(mgmtScope, new ObjectQuery(string.Format("SELECT * FROM MicrosoftDNS_TXTType WHERE OwnerName = '{0}'", dnsKeyName)));
-            ManagementObjectCollection mgmtDNSRecords = mgmtSearch.Get();
+                ManagementObjectSearcher mgmtSearch = new ManagementObjectSearcher(mgmtScope, new ObjectQuery(string.Format("SELECT * FROM MicrosoftDNS_TXTType WHERE OwnerName = '{0}'", dnsKeyName)));
+                ManagementObjectCollection mgmtDNSRecords = mgmtSearch.Get();
 
-            if (mgmtDNSRecords.Count >= 1) {
-                foreach (ManagementObject mgmtDNSRecord in mgmtDNSRecords) {
-                    ManagementBaseObject mgmtParams = mgmtDNSRecord.GetMethodParameters("Modify");
+                if (mgmtDNSRecords.Count >= 1) {
+                    foreach (ManagementObject mgmtDNSRecord in mgmtDNSRecords) {
+                        ManagementBaseObject mgmtParams = mgmtDNSRecord.GetMethodParameters("Modify");
+                        mgmtParams["DescriptiveText"] = dnsKeyValue;
+                        mgmtDNSRecord.InvokeMethod("Modify", mgmtParams, null);
+                        break;
+                    }
+                    logger.Debug($"Updated DNS record of type [TXT] with name [{dnsKeyName}]");
+                    return true;
+                } else if (mgmtDNSRecords.Count == 0) {
+                    ManagementClass mgmtClass = new ManagementClass(mgmtScope, new ManagementPath("MicrosoftDNS_TXTType"), null);
+                    ManagementBaseObject mgmtParams = mgmtClass.GetMethodParameters("CreateInstanceFromPropertyData");
+                    mgmtParams["DnsServerName"] = Environment.MachineName;
+                    if (DNSServerZone == null) DNSServerZone = dnsKeyName.Split('.')[dnsKeyName.Split('.').Count() - 2] + "." + dnsKeyName.Split('.')[dnsKeyName.Split('.').Count() - 1];
+                    mgmtParams["ContainerName"] = DNSServerZone;
+                    mgmtParams["OwnerName"] = dnsKeyName;
                     mgmtParams["DescriptiveText"] = dnsKeyValue;
-                    mgmtDNSRecord.InvokeMethod("Modify", mgmtParams, null);
-                    break;
+                    mgmtClass.InvokeMethod("CreateInstanceFromPropertyData", mgmtParams, null);
+                    logger.Debug($"Created DNS record of type [TXT] with name [{dnsKeyName}]");
+                    return true;
                 }
-                logger.Debug($"Updated DNS record of type [TXT] with name [{dnsKeyName}]");
-                return true;
-            } else if (mgmtDNSRecords.Count == 0) {
-                ManagementClass mgmtClass = new ManagementClass(mgmtScope, new ManagementPath("MicrosoftDNS_TXTType"), null);
-                ManagementBaseObject mgmtParams = mgmtClass.GetMethodParameters("CreateInstanceFromPropertyData");
-                mgmtParams["DnsServerName"] = Environment.MachineName;
-                if (DNSServerZone == null) DNSServerZone = dnsKeyName.Split('.')[dnsKeyName.Split('.').Count() - 2] + "." + dnsKeyName.Split('.')[dnsKeyName.Split('.').Count() - 1];
-                mgmtParams["ContainerName"] = DNSServerZone;
-                mgmtParams["OwnerName"] = dnsKeyName;
-                mgmtParams["DescriptiveText"] = dnsKeyValue;
-                mgmtClass.InvokeMethod("CreateInstanceFromPropertyData", mgmtParams, null);
-                logger.Debug($"Created DNS record of type [TXT] with name [{dnsKeyName}]");
-                return true;
             }
             return false;
         }
 
         private ConnectionOptions LoginOptions()
         {
-            ConnectionOptions connOpt = new ConnectionOptions();
-            connOpt.Username = DNSServerUser;
-            connOpt.Password = DNSServerPassword;
-            connOpt.Impersonation = ImpersonationLevel.Impersonate;
-            return connOpt;
+            if (OperatingSystem.IsWindows())
+            {
+                ConnectionOptions connOpt = new ConnectionOptions();
+                connOpt.Username = DNSServerUser;
+                connOpt.Password = DNSServerPassword;
+                connOpt.Impersonation = ImpersonationLevel.Impersonate;
+                return connOpt;
+            }
+            return null;
         }
     }
 }

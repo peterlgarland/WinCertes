@@ -1,4 +1,4 @@
-using Mono.Options;
+﻿using Mono.Options;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -28,8 +28,10 @@ namespace WinCertes
             WebRoot = null;
             BindName = null;
             ScriptFile = null;
+            ScriptExecutionPolicy = null;
             Standalone = false;
             Revoke = -1;
+            Sni = false;
             Csp = null;
             noCsp = false;
             RenewalDelay = 30;
@@ -41,10 +43,12 @@ namespace WinCertes
         public string BindName { get; set; }
         public int BindPort { get; set; }
         public string ScriptFile { get; set; }
+        public string ScriptExecutionPolicy { get; set; }
         public bool Standalone { get; set; }
         public int Revoke { get; set; }
         public string Csp { get; set; }
         public bool noCsp { get; set; }
+        public bool Sni { get; set; }
         public int RenewalDelay { get; set; }
         public int HttpPort { get; set; }
         public Dictionary<string, string> MiscOpts { get; set; }
@@ -68,8 +72,10 @@ namespace WinCertes
                 // Should we bind to IIS? If yes, let's do some config
                 BindName = config.WriteAndReadStringParameter("bindName", BindName);
                 BindPort = config.WriteAndReadIntParameter("bindPort", BindPort, 0);
+                Sni = config.WriteAndReadBooleanParameter("sni", Sni);
                 // Should we execute some PowerShell ? If yes, let's do some config
                 ScriptFile = config.WriteAndReadStringParameter("scriptFile", ScriptFile);
+                ScriptExecutionPolicy = config.WriteAndReadStringParameter("scriptExecPolicy", ScriptExecutionPolicy);
                 // Writing renewal delay to conf
                 RenewalDelay = config.WriteAndReadIntParameter("renewalDays", RenewalDelay, 30);
                 // Writing HTTP listening Port in conf
@@ -114,11 +120,15 @@ namespace WinCertes
                 else Console.WriteLine("Web Root:\t" + WebRoot);
             }
             Console.WriteLine("IIS Bind Name:\t" + (BindName ?? "none"));
+            Console.WriteLine("SNI Ssl Flag:\t" + (config.isThereConfigParam("sni") ? "yes" : "no"));
             Console.WriteLine("Import in CSP:\t" + (config.isThereConfigParam("noCsp") ? "no" : "yes"));
             Console.WriteLine("PS Script File:\t" + (ScriptFile ?? "none"));
+            Console.WriteLine("PS Exec Policy:\t" + (ScriptExecutionPolicy ?? "undefined"));
             Console.WriteLine("Renewal Delay:\t" + RenewalDelay + " days");
             Console.WriteLine("Task Scheduled:\t" + (Utils.IsScheduledTaskCreated() ? "yes" : "no"));
             Console.WriteLine("Cert Enrolled:\t" + (config.isThereConfigParam("certSerial") ? "yes" : "no"));
+            string extras = config.getExtrasConfigParams();
+            if (!string.IsNullOrEmpty(extras)) Console.WriteLine("Extra Configs:\t" + extras);
         }
     }
 
@@ -160,7 +170,9 @@ namespace WinCertes
                 { "p|periodic", "should WinCertes create the Windows Scheduler task to handle certificate renewal (default=no)", v => _periodic = (v != null) },
                 { "b|bindname=", "IIS site name to bind the certificate to, e.g. \"Default Web Site\". Defaults to no binding.", v => _winCertesOptions.BindName = v },
                 { "n|bindport=", "IIS site port to bind the certificate to, e.g. 443. Defaults to 443, used only if -b is specified.", (int v) => _winCertesOptions.BindPort = v },
+                { "i|sni", "add the Server Name Indicatation Ssl Flag when binding to IIS", v => _winCertesOptions.Sni = (v != null) },
                 { "f|scriptfile=", "PowerShell Script file e.g. \"C:\\Temp\\script.ps1\" to execute upon successful enrollment (default=none)", v => _winCertesOptions.ScriptFile = v },
+                { "x|execpolicy=", "Specify the Execution Policy to run the PowerShell Script file e.g. Unrestricted (default=Undefined)", v => _winCertesOptions.ScriptExecutionPolicy = v },
                 { "a|standalone", "should WinCertes create its own WebServer for validation. Activates HTTP validation mode. WARNING: it will use port 80 unless -l is specified.", v => _winCertesOptions.Standalone = (v != null) },
                 { "r|revoke:", "should WinCertes revoke the certificate identified by its domains (to be used only with -d). {REASON} is an optional integer between 0 and 5.", (int v) => _winCertesOptions.Revoke = v },
                 { "k|csp=", "import the certificate into specified csp. By default WinCertes imports in the default CSP.", v => _winCertesOptions.Csp = v },
@@ -258,12 +270,12 @@ namespace WinCertes
         /// </summary>
         private static void InitWinCertesDirectoryPath()
         {
-            _winCertesPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + "\\WinCertes";
+            _winCertesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "WinCertes");
             if (!System.IO.Directory.Exists(_winCertesPath))
             {
                 System.IO.Directory.CreateDirectory(_winCertesPath);
             }
-            _certTmpPath = _winCertesPath + "\\CertsTmp";
+            _certTmpPath = Path.Combine(_winCertesPath, "CertsTmp");
             if (!System.IO.Directory.Exists(_certTmpPath))
             {
                 System.IO.Directory.CreateDirectory(_certTmpPath);
@@ -272,17 +284,20 @@ namespace WinCertes
             // so that no user can have access to it
             DirectoryInfo winCertesTmpDi = new DirectoryInfo(_certTmpPath);
             DirectoryInfo programDataDi = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
-            DirectorySecurity programDataDs = programDataDi.GetAccessControl(AccessControlSections.All);
-            DirectorySecurity winCertesTmpDs = winCertesTmpDi.GetAccessControl(AccessControlSections.All);
-            winCertesTmpDs.SetAccessRuleProtection(true, false);
-            foreach (FileSystemAccessRule accessRule in programDataDs.GetAccessRules(true, true, typeof(NTAccount)))
+            if (OperatingSystem.IsWindows())
             {
-                if (accessRule.IdentityReference.Value.IndexOf("Users", StringComparison.InvariantCultureIgnoreCase) < 0)
+                DirectorySecurity programDataDs = programDataDi.GetAccessControl(AccessControlSections.All);
+                DirectorySecurity winCertesTmpDs = winCertesTmpDi.GetAccessControl(AccessControlSections.All);
+                winCertesTmpDs.SetAccessRuleProtection(true, false);
+                foreach (FileSystemAccessRule accessRule in programDataDs.GetAccessRules(true, true, typeof(NTAccount)))
                 {
-                    winCertesTmpDs.AddAccessRule(accessRule);
+                    if (accessRule.IdentityReference.Value.IndexOf("Users", StringComparison.InvariantCultureIgnoreCase) < 0)
+                    {
+                        winCertesTmpDs.AddAccessRule(accessRule);
+                    }
                 }
+                winCertesTmpDi.SetAccessControl(winCertesTmpDs);
             }
-            winCertesTmpDi.SetAccessControl(winCertesTmpDs);
         }
 
         /// <summary>
@@ -384,12 +399,12 @@ namespace WinCertes
             if (!_winCertesOptions.noCsp) certificateStorageManager.ImportCertificateIntoCSP(_winCertesOptions.Csp);
 
             // Bind certificate to IIS Site (won't do anything if option is null)
-            if (Utils.BindCertificateForIISSite(certificateStorageManager.Certificate, _winCertesOptions.BindName, _winCertesOptions.BindPort))
+            if (Utils.BindCertificateForIISSite(certificateStorageManager.Certificate, _winCertesOptions.BindName, _winCertesOptions.BindPort, _winCertesOptions.Sni))
                 _logger.Info("Successfully bound certificate for IIS site: " + _winCertesOptions.BindName);
             else
                 _logger.Debug("Certificate not bound to any IIS site");
             // Execute PowerShell Script (won't do anything if option is null)
-            Utils.ExecutePowerShell(_winCertesOptions.ScriptFile, pfx);
+            Utils.ExecutePowerShell(_winCertesOptions.ScriptFile, pfx, _winCertesOptions.ScriptExecutionPolicy);
             // Create the AT task that will execute WinCertes periodically (won't do anything if taskName is null)
             Utils.CreateScheduledTask(taskName, _domains, _extra);
 

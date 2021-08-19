@@ -3,25 +3,31 @@ using System;
 using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace WinCertes.ChallengeValidator
 {
     class HTTPChallengeWebServerValidator : IHTTPChallengeValidator
     {
         private static readonly ILogger logger = LogManager.GetLogger("WinCertes.ChallengeValidator.HTTPChallengeWebServerValidator");
-        private Thread _serverThread;
+        private CancellationTokenSource _cts;
         private HttpListener _listener;
         private string _tokenContents;
         private int httpPort;
 
-        private void Listen()
+        private void Listen(CancellationToken token)
         {
             try {
                 _listener = new HttpListener();
                 _listener.Prefixes.Add("http://*:"+this.httpPort+"/");
+                token.Register(() =>
+                {
+                    _listener.Stop();
+                    logger.Debug("Thread has been disposed.");
+                });
                 _listener.Start();
                 logger.Debug("Started HTTP Listener on port "+this.httpPort);
-                while (true) {
+                while (!token.IsCancellationRequested) {
                     try {
                         HttpListenerContext context = _listener.GetContext();
                         Process(context);
@@ -30,7 +36,7 @@ namespace WinCertes.ChallengeValidator
                     }
                 }
             } catch (Exception e) {
-                if (!e.Message.Equals("Thread was being aborted.")) logger.Error($"Could not start to listen on port 80: {e.Message}");
+                if (!e.Message.Equals("Thread was being aborted.")) logger.Error($"Could not start to listen on port {this.httpPort}: {e.Message}");
             }
         }
 
@@ -60,10 +66,9 @@ namespace WinCertes.ChallengeValidator
         {
             this.httpPort = httpPort;
             try {
-                _serverThread = new Thread(this.Listen) {
-                    IsBackground = true
-                };
-                _serverThread.Start();
+                _cts = new CancellationTokenSource();
+                Task.Run(() => { Listen(_cts.Token); });
+
             } catch (Exception e) {
                 logger.Warn($"Could not start web server: {e.Message}.");
             }
@@ -77,7 +82,7 @@ namespace WinCertes.ChallengeValidator
         public bool PrepareChallengeForValidation(string token, string keyAuthz)
         {
             _tokenContents = keyAuthz;
-            if (_serverThread != null) return true;
+            if (_listener != null) return true;
             return false;
         }
 
@@ -95,7 +100,7 @@ namespace WinCertes.ChallengeValidator
         /// </summary>
         public void EndAllChallengeValidations()
         {
-            _serverThread.Abort();
+            _cts.Cancel();
             _listener.Stop();
             logger.Debug("Just stopped the HTTP Listener");
         }

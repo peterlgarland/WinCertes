@@ -21,52 +21,59 @@ namespace WinCertes
         /// </summary>
         public RegistryConfig(int extra = -1)
         {
-            try
+            if (OperatingSystem.IsWindows())
             {
-                // First we check if WinCertes key is there
-                RegistryKey winCertesKey = Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("WinCertes", RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryRights.FullControl);
-                if (winCertesKey == null)
+                try
                 {
-                    // and if not, we create it
-                    Registry.LocalMachine.OpenSubKey("SOFTWARE", true).CreateSubKey("WinCertes", RegistryKeyPermissionCheck.ReadWriteSubTree);
-                    winCertesKey = Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("WinCertes", RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryRights.FullControl);
-                }
-                // Let's fix the permissions
-                RegistrySecurity winCertesKeySec = winCertesKey.GetAccessControl(AccessControlSections.All);
-                // First we remove the inheritence
-                winCertesKeySec.SetAccessRuleProtection(true, false);
-                RegistrySecurity security = Registry.LocalMachine.OpenSubKey("SOFTWARE", false).GetAccessControl(AccessControlSections.Access);
-                // Copy rules from parent ("HKLM\Software"), except user access
-                foreach (RegistryAccessRule rule in security.GetAccessRules(true, true, typeof(NTAccount)))
-                {
-                    try
+                    // First we check if WinCertes key is there
+                    RegistryKey winCertesKey = Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("WinCertes", RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryRights.FullControl);
+                    if (winCertesKey == null)
                     {
-                        // Copy all relevant rules except user
-                        if (rule.IdentityReference.Value.IndexOf("Users", StringComparison.InvariantCultureIgnoreCase) < 0)
+                        // and if not, we create it
+                        Registry.LocalMachine.OpenSubKey("SOFTWARE", true).CreateSubKey("WinCertes", RegistryKeyPermissionCheck.ReadWriteSubTree);
+                        winCertesKey = Registry.LocalMachine.OpenSubKey("SOFTWARE", true).OpenSubKey("WinCertes", RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryRights.FullControl);
+                    }
+                    // Let's fix the permissions
+                    RegistrySecurity winCertesKeySec = winCertesKey.GetAccessControl(AccessControlSections.All);
+                    // First we remove the inheritence
+                    winCertesKeySec.SetAccessRuleProtection(true, false);
+                    RegistrySecurity security = Registry.LocalMachine.OpenSubKey("SOFTWARE", false).GetAccessControl(AccessControlSections.Access);
+                    // Copy rules from parent ("HKLM\Software"), except user access
+                    foreach (RegistryAccessRule rule in security.GetAccessRules(true, true, typeof(NTAccount)))
+                    {
+                        try
                         {
-                            winCertesKeySec.AddAccessRule(rule);
+                            // Copy all relevant rules except user
+                            if (rule.IdentityReference.Value.IndexOf("Users", StringComparison.InvariantCultureIgnoreCase) < 0)
+                            {
+                                winCertesKeySec.AddAccessRule(rule);
+                            }
                         }
+                        catch { }
                     }
-                    catch { }
-                }
-                winCertesKey.SetAccessControl(winCertesKeySec);
-                if (extra > -1)
-                {
-                    string extraIndex = "";
-                    if (extra > 1)
-                        extraIndex = extra.ToString();
-                    if (Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes").OpenSubKey("extra" + extraIndex) == null)
+                    winCertesKey.SetAccessControl(winCertesKeySec);
+                    if (extra > -1)
                     {
-                        _logger.Debug("Creating SubKey 'extra" + extraIndex + "'");
-                        Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes", true).CreateSubKey("extra" + extraIndex, RegistryKeyPermissionCheck.ReadWriteSubTree);
+                        string extraIndex = "";
+                        if (extra > 1)
+                            extraIndex = extra.ToString();
+                        if (Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes").OpenSubKey("extra" + extraIndex) == null)
+                        {
+                            _logger.Debug("Creating SubKey 'extra" + extraIndex + "'");
+                            Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes", true).CreateSubKey("extra" + extraIndex, RegistryKeyPermissionCheck.ReadWriteSubTree);
+                        }
+                        _registryKey += @"\extra" + extraIndex;
+                        _subKey += @"\extra" + extraIndex;
                     }
-                    _registryKey += @"\extra" + extraIndex;
-                    _subKey += @"\extra" + extraIndex;
+                }
+                catch (Exception e)
+                {
+                    _logger.Warn(e, $"Warning: Could not open/create registry subkey: {e.Message}. We'll try to continue anyway.");
                 }
             }
-            catch (Exception e)
+            else
             {
-                _logger.Warn(e, $"Warning: Could not open/create registry subkey: {e.Message}. We'll try to continue anyway.");
+                _logger.Warn($"Warning: Not running on Windows so currently can't store the Configuration in the Registry, We'll try to continue anyway.");
             }
         }
 
@@ -77,7 +84,8 @@ namespace WinCertes
         /// <returns>the parameter value, null if none</returns>
         public string ReadStringParameter(string parameter)
         {
-            return (string)Registry.GetValue(_registryKey, parameter, null);
+            if (OperatingSystem.IsWindows()) return (string)Registry.GetValue(_registryKey, parameter, null);
+            return null;
         }
 
         /// <summary>
@@ -88,7 +96,7 @@ namespace WinCertes
         public void WriteStringParameter(string parameter, string value)
         {
             if ((parameter == null) || (value == null)) { return; }
-            Registry.SetValue(_registryKey, parameter, value, RegistryValueKind.String);
+            if (OperatingSystem.IsWindows()) Registry.SetValue(_registryKey, parameter, value, RegistryValueKind.String);
         }
 
         /// <summary>
@@ -144,7 +152,8 @@ namespace WinCertes
         /// <returns></returns>
         public int ReadIntParameter(string parameter, int defaultValue = 0)
         {
-            return (int)Registry.GetValue(_registryKey, parameter, defaultValue);
+            if (OperatingSystem.IsWindows()) return (int)Registry.GetValue(_registryKey, parameter, defaultValue);
+            return defaultValue;
         }
 
         /// <summary>
@@ -171,7 +180,7 @@ namespace WinCertes
         public void WriteIntParameter(string parameter, int value)
         {
             if (parameter == null) { return; }
-            Registry.SetValue(_registryKey, parameter, value, RegistryValueKind.DWord);
+            if (OperatingSystem.IsWindows()) Registry.SetValue(_registryKey, parameter, value, RegistryValueKind.DWord);
         }
 
         /// <summary>
@@ -195,10 +204,13 @@ namespace WinCertes
         /// <param name="parameter"></param>
         public void DeleteParameter(string parameter)
         {
-            RegistryKey key = Registry.LocalMachine.OpenSubKey(_subKey, true);
-            if (key != null)
+            if (OperatingSystem.IsWindows())
             {
-                key.DeleteValue(parameter);
+                RegistryKey key = Registry.LocalMachine.OpenSubKey(_subKey, true);
+                if (key != null)
+                {
+                    key.DeleteValue(parameter);
+                }
             }
         }
 
@@ -208,32 +220,69 @@ namespace WinCertes
         /// <param name="startsWith">the parameter to look for</param>
         public bool isThereConfigParam(string startsWith)
         {
-            foreach (string key in Registry.LocalMachine.OpenSubKey(_subKey).GetValueNames())
+            if (OperatingSystem.IsWindows())
             {
-                if (key.StartsWith(startsWith))
-                    return true;
+                foreach (string key in Registry.LocalMachine.OpenSubKey(_subKey).GetValueNames())
+                {
+                    if (key.StartsWith(startsWith))
+                        return true;
+                }
             }
             return false;
         }
 
-        /// <summary>
+                /// <summary>
         /// Deletes all WinCertes parameters from configuration
         /// </summary>
         public void DeleteAllParameters()
         {
-            if (Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes").OpenSubKey("extra") != null)
+            if (OperatingSystem.IsWindows())
             {
-                Registry.LocalMachine.OpenSubKey(_subKey, true).DeleteSubKeyTree("extra");
+                if (Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes").OpenSubKey("extra") != null)
+                {
+                    Registry.LocalMachine.OpenSubKey(_subKey, true).DeleteSubKeyTree("extra");
+                }
+                foreach (string subKey in Registry.LocalMachine.OpenSubKey(_subKey).GetSubKeyNames())
+                {
+                    if (Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes").OpenSubKey(subKey) != null)
+                        Registry.LocalMachine.OpenSubKey(_subKey, true).DeleteSubKeyTree(subKey);
+                }
+                foreach (string key in Registry.LocalMachine.OpenSubKey(_subKey).GetValueNames())
+                {
+                    DeleteParameter(key);
+                }
             }
-            for (int i = 2; i < 10; i++)
+        }
+
+        /// <summary>
+        /// Gets the number of Extras in the configuration
+        /// </summary>
+        /// <returns>string list of the Extra numbers</returns>
+        public string getExtrasConfigParams()
+        {
+            string output = "";
+            bool flag = false;
+
+            if (OperatingSystem.IsWindows())
             {
-                if (Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes").OpenSubKey("extra" + i) != null)
-                    Registry.LocalMachine.OpenSubKey(_subKey, true).DeleteSubKeyTree("extra" + i);
+                foreach (string subKey in Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes").GetSubKeyNames())
+                {
+                    if (subKey.StartsWith("extra"))
+                    {
+                        if (flag)
+                            output += ", ";
+                        else
+                            flag = true;
+
+                        if (subKey.Length == 5)
+                            output += "1";
+                        else
+                            output += subKey.Substring(5);
+                    }
+
+                }
             }
-            foreach (string key in Registry.LocalMachine.OpenSubKey(_subKey).GetValueNames())
-            {
-                DeleteParameter(key);
-            }
+            return output;
         }
     }
 }

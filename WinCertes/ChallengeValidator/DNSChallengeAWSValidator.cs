@@ -26,7 +26,7 @@ namespace WinCertes.ChallengeValidator
             zoneId = _config.ReadStringParameter("DNSAWSZoneId");
         }
 
-        public bool PrepareChallengeForValidation(string dnsKeyName, string dnsKeyValue)
+        public async Task<bool> PrepareChallengeForValidationAsync(string dnsKeyName, string dnsKeyValue)
         {
             try
             {
@@ -34,12 +34,12 @@ namespace WinCertes.ChallengeValidator
                 HostedZone zone = null;
                 if (zoneId != null)
                 {
-                    GetHostedZoneResponse zoneResp = route53Client.GetHostedZone(new Amazon.Route53.Model.GetHostedZoneRequest { Id = zoneId });
+                    GetHostedZoneResponse zoneResp = await route53Client.GetHostedZoneAsync(new Amazon.Route53.Model.GetHostedZoneRequest { Id = zoneId });
                     zone = zoneResp.HostedZone;
                 }
                 else
                 {
-                    ListHostedZonesResponse zones = route53Client.ListHostedZones();
+                    ListHostedZonesResponse zones = await route53Client.ListHostedZonesAsync();
                     string recordToZone = dnsKeyName;
                     while (recordToZone.IndexOf('.') > 0)
                     {
@@ -55,7 +55,7 @@ namespace WinCertes.ChallengeValidator
                     return false;
                 }
 
-                ListResourceRecordSetsResponse txtRecordsResponse = route53Client.ListResourceRecordSets(new ListResourceRecordSetsRequest
+                ListResourceRecordSetsResponse txtRecordsResponse = await route53Client.ListResourceRecordSetsAsync(new ListResourceRecordSetsRequest
                 {
                     StartRecordName = dnsKeyName,
                     StartRecordType = "TXT",
@@ -66,7 +66,7 @@ namespace WinCertes.ChallengeValidator
 
                 if (txtRecord != null)
                 {
-                    ApplyDnsChange(zone, txtRecord, ChangeAction.DELETE);
+                    await ApplyDnsChangeAsync(zone, txtRecord, ChangeAction.DELETE);
 
                 }
 
@@ -81,7 +81,7 @@ namespace WinCertes.ChallengeValidator
                 }
                 };
 
-                ApplyDnsChange(zone, txtRecord, ChangeAction.UPSERT);
+                await ApplyDnsChangeAsync(zone, txtRecord, ChangeAction.UPSERT);
             }
             catch (AmazonRoute53Exception exp)
             {
@@ -91,7 +91,7 @@ namespace WinCertes.ChallengeValidator
             return true;
         }
 
-        private bool ApplyDnsChange(HostedZone zone, ResourceRecordSet recordSet, ChangeAction action)
+        private async Task<bool> ApplyDnsChangeAsync(HostedZone zone, ResourceRecordSet recordSet, ChangeAction action)
         {
             // Prepare change as Batch
             Change changeDetails = new Change()
@@ -114,7 +114,7 @@ namespace WinCertes.ChallengeValidator
 
             logger.Debug($"Route53 :: ApplyDnsChange : ChangeResourceRecordSets: {recordsetRequest.ChangeBatch} ");
 
-            var recordsetResponse = route53Client.ChangeResourceRecordSets(recordsetRequest);
+            var recordsetResponse = await route53Client.ChangeResourceRecordSetsAsync(recordsetRequest);
 
             logger.Debug($"Route53 :: ApplyDnsChange : ChangeResourceRecordSets Response: {recordsetResponse} ");
 
