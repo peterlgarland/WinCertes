@@ -13,7 +13,7 @@ Features:
 - Auto renewal using Scheduled Task
 - SAN support (multi-domain certificates)
 - Full support for ACMEv2, including Wildcard Certificate support (\*.example.com) [\*]
-- Optional powershell scripting for advanced deployment (Exchange, multi-server, etc)
+- Optional PowerShell Core scripting for advanced deployment (Exchange, multi-server, etc)
 - HTTP challenge validation.
 	- Built-in Http Challenge Server for easier configuration of challenge responses
 	- Ability to support already installed web server (by default IIS) to provide challenge responses
@@ -23,7 +23,7 @@ Features:
 	- Support for AWS Route53
 - Import of certificate and key into chosen CSP/KSP, enabling compatibility with HSMs
 - Support of any ACMEv2 compliant CA, including Let's Encrypt and Let's Encrypt Staging (for tests/dry-run)
-- Windows Installer for easy deployment
+- Windows Installer for easy deployment, but you must have .NET 5.0 Runtime installed
 - Configuration is stored in Registry
 - Support for certificate revocation
 - Logs activity to STDOUT and file
@@ -143,6 +143,8 @@ $mypfx.EndEntityCertificates.Subject | Out-File -FilePath c:\temp\test.txt -Appe
 Copy-Item -Path $cer -Destination C:\\Program\ Files\\Apache\ Group\\Apache2\\conf\\server.crt
 Copy-Item -Path $key -Destination C:\\Program\ Files\\Apache\ Group\\Apache2\\conf\\server.key
 ```
+
+Please note the PS script is run in a PowerShell Core runspace, if you wish to Add-PSSnapin for example to connect with Exchange, you must run Windows PowerShell from your PS script.
 
 About IIS Configuration
 -------------
