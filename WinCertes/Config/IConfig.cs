@@ -1,4 +1,6 @@
-﻿namespace WinCertes
+﻿using System.Collections.Generic;
+
+namespace WinCertes
 {
     /// <summary>
     /// Interface to Configuration Engine
@@ -51,6 +53,14 @@
         /// <returns>the parameter value, null if none</returns>
         string ReadStringParameter(string parameter);
 
+        // <summary>
+        /// Aims at handling flags with configuration parameter. Deletes the flag
+        /// </summary>
+        /// <param name="parameter">the flag</param>
+        /// <param name="value">the flag's value</param>
+        /// <returns>the flag's value</returns>
+        public bool WriteBooleanParameter(string parameter, bool value);
+
         /// <summary>
         /// Aims at handling flags with configuration parameter. Once a flag has been set to true, it's written forever in the configuration
         /// </summary>
@@ -88,14 +98,20 @@
         bool isThereConfigParam(string startsWith);
 
         /// <summary>
-        /// Deletes all WinCertes parameters from configuration
+        /// Deletes all WinCertes parameters from configuration, or a speicifc extra configuration
         /// </summary>
-        void DeleteAllParameters();
+        void DeleteAllParameters(int extra = -1);
 
         /// <summary>
         /// Gets the number of Extras in the configuration
         /// </summary>
-        /// <returns>string list of the Extra numbers</returns>
-        string getExtrasConfigParams();
+        /// <returns>int list of the Extra numbers</returns>
+        IList<int> getExtrasConfigParams();
+
+        /// <summary>
+        /// Gets the DomainsToHostId for Certificates in the Registry
+        /// </summary>
+        /// <returns>string list of the DomainsToHostIds</returns>
+        IList<string> getCertificateParams(string startsWith);
     }
 }

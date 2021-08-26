@@ -9,6 +9,7 @@ Requirements:
 
 Features:
 - CLI-based for easy integration with DevOps
+
 - Easy certificate requests & automated SSL bindings
 - Auto renewal using Scheduled Task
 - SAN support (multi-domain certificates)
@@ -24,7 +25,12 @@ Features:
 - Import of certificate and key into chosen CSP/KSP, enabling compatibility with HSMs
 - Support of any ACMEv2 compliant CA, including Let's Encrypt and Let's Encrypt Staging (for tests/dry-run)
 - Windows Installer for easy deployment, but you must have .NET 5.0 Runtime installed
-- Configuration is stored in Registry
+- GUI option for super easy use
+   - Currently limited to HTTP Validation via IIS or the Standalone Http Challenge Server
+   - Ability to rebind Certificate to an IIS Site
+   - Update Scheduled Task and PS Script
+   - View and Revoke the issued certificates
+- Shared Configuration is stored in Registry for both CLI and GUI
 - Support for certificate revocation
 - Logs activity to STDOUT and file
 
@@ -32,8 +38,26 @@ Features:
 
 This OpenSource software is brought to you by [EverTrust](https://github.com/EverTrust), which provides support plans for it as part of EverTrust Horizon software suite.
 
+
 ----------
-Quick Start (IIS users)
+Quick Start (GUI and IIS users)
+----------
+1. Download from GitHub and install it.
+2. Run WinCertes as an Administrator from the Start Menu
+3. Enter your e-mail address,
+4. Select the IIS Site to bind to / use for Challenge Response
+5. Tick the Bind to IIS if you want to, otherwise it will just use the site for the Challenge
+6. Add Additional domains to the Domains List
+7. Tick Schedule Task
+8. Browse for a PS Core Script if you need to run one, and optional change it's Execution Policy
+9. Press Issue Certificate
+
+And... That's all! The certificate is requested from Let's Encrypt, and bound to the IIS Site you chose. You can create a New configuration to generate more certificates and
+continue renewing this one, or updating any setting before renewal.
+You can also revoke and view the certificates at any time.
+
+----------
+Quick Start (CLI and IIS users)
 ----------
 1. Download from GitHub and install it.
 2. Launch a command line (cmd.exe) as Administrator
@@ -197,6 +221,13 @@ Most common causes are:
 - After testing you need to reinitialize WinCertes context: delete all registry keys under HKLM\Software\WinCertes
 
 
+Graphical User Interface
+-------------
+
+Run the WinCertes GUI from the Start Menu, it should request Admin rights, if it doesn't, hold Ctrl+Shift as your Click the WinCertes icon to run as Administrator.
+Once the e-mail, Service and Domains are populated it can work its magic. The configuration is the same as the CLI, and the renewal is done by the CLI in the Scheduled Task. 
+
+
 Development & Bug Reporting
 -------------
 
@@ -214,6 +245,7 @@ The development requires Visual Studio 2017 or 2019, and Wix if you want to buil
 
 
 This project is (c) 2018-2019 Alexandre Aufrere
+GUI is (c) 2021 Peter Luke Garland
 
 Released under the terms of GPLv3
 

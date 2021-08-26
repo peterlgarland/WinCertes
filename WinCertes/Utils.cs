@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -64,9 +63,9 @@ namespace WinCertes
     }
 
     /// <summary>
-    /// This class is a catalog of static methods to be used for various purposes within WinCertes
+    /// This static class is a catalog of static methods to be used for various purposes within WinCertes
     /// </summary>
-    public class Utils
+    public static class Utils
     {
         private static readonly ILogger logger = LogManager.GetLogger("WinCertes.Utils");
 
@@ -133,6 +132,25 @@ namespace WinCertes
         }
 
         /// <summary>
+        /// Gets a List of Sites from the local IIS server
+        /// </summary>
+        /// <returns>null if failed, or a List of Sites</returns>
+        public static SiteCollection GetIISSites()
+        {
+            try
+            {
+                ServerManager serverMgr = new ServerManager();
+                if (serverMgr == null) return null;
+                return serverMgr.Sites;
+
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Binds the specified certificate located in "MY" store to the specified IIS site on the local machine
         /// </summary>
         /// <param name="certificate"></param>
@@ -150,7 +168,8 @@ namespace WinCertes
                     logger.Error($"Could not find IIS site {siteName}");
                     return false;
                 }
-                if (port > 0)
+                // Use whether they want SNI on, rather than it not being on Port 0 = 443
+                if (!sni)
                 {
                     bool foundBinding = false;
                     foreach (Binding binding in site.Bindings)
@@ -170,7 +189,9 @@ namespace WinCertes
                     {
                         Binding binding = site.Bindings.Add("*:" + port + ":", certificate.GetCertHash(), "MY");
                         binding.Protocol = "https";
-                        if (sni) binding.SslFlags = SslFlags.Sni;
+                        // This is technically not necessary, but seems it doesn't always put the Hash on the binding without this extra confirmation!
+                        binding.CertificateHash = certificate.GetCertHash();
+                        binding.CertificateStoreName = "MY";
                         logger.Debug("Could not find binding, will try to create one on port " + port);
                     }
                 }
@@ -194,9 +215,13 @@ namespace WinCertes
                         }
                         if (!foundBinding)
                         {
-                            Binding binding = site.Bindings.Add("*:443:" + sanDns, certificate.GetCertHash(), "MY");
+                            // Use whatever port is specified (or 443 if it's 0)
+                            Binding binding = site.Bindings.Add("*:" + (port == 0 ? 443 : port) + ":" + sanDns, certificate.GetCertHash(), "MY");
                             binding.Protocol = "https";
-                            if (sni) binding.SslFlags = SslFlags.Sni;
+                            // This is technically not necessary, but seems it doesn't always put the Hash on the binding without this extra confirmation!
+                            binding.CertificateHash = certificate.GetCertHash();
+                            binding.SslFlags = SslFlags.Sni;
+                            binding.CertificateStoreName = "MY";
                             logger.Debug("Could not find binding, will try to create one on port 443");
                         }
                     }
@@ -215,7 +240,12 @@ namespace WinCertes
             }
         }
 
-        private static List<string> ParseSubjectAlternativeName(X509Certificate2 cert)
+        /// <summary>
+        /// Gets a list of the additional DNS Names on the certificate
+        /// </summary>
+        /// <param name="cert">The certificate to get SAN Addresses from</param>
+        /// <returns>List of domain names</returns>
+        public static List<string> ParseSubjectAlternativeName(X509Certificate2 cert)
         {
             var result = new List<string>();
             var subjectAlternativeName = cert.Extensions.Cast<X509Extension>()
@@ -285,8 +315,8 @@ namespace WinCertes
         /// <summary>
         /// Creates the windows scheduled task
         /// </summary>
-        /// <param name="domains"></param>
-        /// <param name="taskName"></param>
+        /// <param name="domains">The domains to renew</param>
+        /// <param name="taskName">The friendky certificate name or null to ignore</param>
         public static void CreateScheduledTask(string taskName, List<string> domains, int extra)
         {
             if (taskName == null) return;
@@ -321,7 +351,12 @@ namespace WinCertes
             }
         }
 
-        public static bool IsScheduledTaskCreated()
+        /// <summary>
+        /// Checks whether there is a Scheduled task created
+        /// </summary>
+        /// <param name="taskName">The friendly name of the Certificate or check any</param>
+        /// <returns>True if one exists, False if it doesn't</returns>
+        public static bool IsScheduledTaskCreated(string taskName = null)
         {
             try
             {
@@ -329,8 +364,16 @@ namespace WinCertes
                 {
                     foreach (TS.Task t in ts.RootFolder.Tasks)
                     {
-                        if (t.Name.StartsWith("WinCertes"))
-                            return true;
+                        if (string.IsNullOrEmpty(taskName))
+                        {
+                            if (t.Name.StartsWith("WinCertes"))
+                                return true;
+                        }
+                        else
+                        {
+                            if (t.Name == $"WinCertes - {taskName}")
+                                return true;
+                        }
                     }
                 }
                 return false;
@@ -342,7 +385,11 @@ namespace WinCertes
             }
         }
 
-        public static void DeleteScheduledTasks()
+        /// <summary>
+        /// Deletes the specified Scheduled Task or all of them
+        /// </summary>
+        /// <param name="taskName">The friendly name of the Certificate or null for All of them</param>
+        public static void DeleteScheduledTasks(string taskName = null)
         {
             try
             {
@@ -350,8 +397,19 @@ namespace WinCertes
                 {
                     foreach (TS.Task t in ts.RootFolder.Tasks)
                     {
-                        if (t.Name.StartsWith("WinCertes"))
-                            ts.RootFolder.DeleteTask(t.Name, false);
+                        if (string.IsNullOrEmpty(taskName))
+                        {
+                            if (t.Name.StartsWith("WinCertes"))
+                                ts.RootFolder.DeleteTask(t.Name, false);
+                        }
+                        else
+                        {
+                            if (t.Name == $"WinCertes - {taskName}")
+                            {
+                                ts.RootFolder.DeleteTask(t.Name, false);
+                                return;
+                            }
+                        }
                     }
                 }
             }
@@ -421,11 +479,33 @@ namespace WinCertes
         /// <returns>the certificate, or null if not found</returns>
         public static X509Certificate2 GetCertificateBySerial(string serial)
         {
+            return GetCertificate(serial, X509FindType.FindBySerialNumber);
+        }
+
+        /// <summary>
+        /// Retrieves a certificate from machine store, given the IIS Bind Hash
+        /// </summary>
+        /// <param name="hash">the IIS Bind Hash of the certificate to retrieve</param>
+        /// <returns>the certificate, or null if not found</returns>
+        public static X509Certificate2 GetCertificateByHash(byte[] hash)
+        {
+            var thumb = Convert.ToHexString(hash);
+            return GetCertificate(thumb, X509FindType.FindByThumbprint);
+        }
+
+        /// <summary>
+        /// Retreives a certificate from the machine store, given either the Serial or Thumbprint
+        /// </summary>
+        /// <param name="serialThumb">The Certificate Serial or Thumbprint</param>
+        /// <param name="findBy">Either BySerial or ByThumbprint (others will fail)</param>
+        /// <returns>The certificate, or null if not found</returns>
+        public static X509Certificate2 GetCertificate(string serialThumb, X509FindType findBy)
+        {
             try
             {
                 X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
                 store.Open(OpenFlags.ReadOnly);
-                X509Certificate2Collection collection = store.Certificates.Find(X509FindType.FindBySerialNumber, serial, false);
+                X509Certificate2Collection collection = store.Certificates.Find(findBy, serialThumb, false);
                 store.Close();
                 if (collection.Count == 0)
                 {
@@ -444,6 +524,11 @@ namespace WinCertes
             }
         }
 
+        /// <summary>
+        /// Generates a new key pair
+        /// </summary>
+        /// <param name="keySize">Size of the key</param>
+        /// <returns>new Key Pair as PEM</returns>
         public static string GenerateRSAKeyAsPEM(int keySize)
         {
             try

@@ -15,9 +15,9 @@ using WinCertes.ChallengeValidator;
 namespace WinCertes
 {
     /// <summary>
-    /// Class to handle the command line parameters given to WinCertes
+    /// Class to handle the command line parameters given to WinCertes, made public for GUI to access
     /// </summary>
-    class WinCertesOptions
+    public class WinCertesOptions
     {
         private static readonly ILogger _logger = LogManager.GetLogger("WinCertes.WinCertesOptions");
 
@@ -51,13 +51,23 @@ namespace WinCertes
         public bool Sni { get; set; }
         public int RenewalDelay { get; set; }
         public int HttpPort { get; set; }
+        public bool BindSite { get; set; }
+        public bool Registered { get; set; }
+        public bool PsScript { get; set; }
+        public bool PsExec { get; set; }
+        public string DomainsHostId { get; set; }
+        public string DomainsFriendlyName { get; set; }
+        public string CertSerial { get; set; }
+        public bool TaskScheduled { get; set; }
+
         public Dictionary<string, string> MiscOpts { get; set; }
 
         /// <summary>
         /// Writes command line parameters into the specified config
         /// </summary>
         /// <param name="config">the configuration object</param>
-        public void WriteOptionsIntoConfiguration(IConfig config)
+        /// <param name="forceWrite">Forces writing new Boolean values</param>
+        public void WriteOptionsIntoConfiguration(IConfig config, bool forceWrite = false)
         {
             try
             {
@@ -72,18 +82,52 @@ namespace WinCertes
                 // Should we bind to IIS? If yes, let's do some config
                 BindName = config.WriteAndReadStringParameter("bindName", BindName);
                 BindPort = config.WriteAndReadIntParameter("bindPort", BindPort, 0);
-                Sni = config.WriteAndReadBooleanParameter("sni", Sni);
+                BindSite = forceWrite ? config.WriteBooleanParameter("bindSite", BindSite) : config.WriteAndReadBooleanParameter("bindSite", BindSite);
+                Sni = forceWrite ? config.WriteBooleanParameter("sni", Sni) : config.WriteAndReadBooleanParameter("sni", Sni);
+
                 // Should we execute some PowerShell ? If yes, let's do some config
+                PsScript = forceWrite ? config.WriteBooleanParameter("psScript", PsScript) : config.WriteAndReadBooleanParameter("psScript", PsScript);
+                PsExec = forceWrite ? config.WriteBooleanParameter("psExec", PsExec) : config.WriteAndReadBooleanParameter("psExec", PsExec);
                 ScriptFile = config.WriteAndReadStringParameter("scriptFile", ScriptFile);
                 ScriptExecutionPolicy = config.WriteAndReadStringParameter("scriptExecPolicy", ScriptExecutionPolicy);
                 // Writing renewal delay to conf
-                RenewalDelay = config.WriteAndReadIntParameter("renewalDays", RenewalDelay, 30);
+                RenewalDelay = config.WriteAndReadIntParameter("renewalDays", RenewalDelay, 0);
                 // Writing HTTP listening Port in conf
-                HttpPort = config.WriteAndReadIntParameter("httpPort", HttpPort, 80);
+                HttpPort = config.WriteAndReadIntParameter("httpPort", HttpPort, 0);
                 // Should we store certificate in the CSP?
                 noCsp = config.WriteAndReadBooleanParameter("noCsp", noCsp);
                 // Let's store the CSP name, if any
                 Csp = config.WriteAndReadStringParameter("CSP", Csp);
+                // Get some Readonly parameters to help out
+                Registered = (config.ReadIntParameter("registered") == 1);
+
+                DomainsHostId = config.ReadStringParameter("domainsHostId");
+
+                // This is to upgrade 1.5.0 or below clients for the GUI (basically get the _xxxx after certSerial) Only works if 1 Certificate has been created in the Config
+                if (string.IsNullOrEmpty(DomainsHostId) && config.isThereConfigParam("certSerial"))
+                {
+                    IList<string> certs = config.getCertificateParams("certSerial");
+                    if (certs.Count == 1)
+                    {
+                        DomainsHostId = certs[0];
+                        config.WriteStringParameter("domainsHostId", DomainsHostId);
+                    }
+                }
+                CertSerial = config.ReadStringParameter("certSerial" + DomainsHostId);
+                DomainsFriendlyName = config.ReadStringParameter("domainsFriendlyName");
+
+                // This is also to upgrade 1.5.0 or below clients for the GUI (basically get the Friendly name from the Certificate)
+                if (string.IsNullOrEmpty(DomainsFriendlyName) && !string.IsNullOrEmpty(CertSerial))
+                {
+                        var cert = Utils.GetCertificateBySerial(CertSerial);
+                        if (cert != null && !string.IsNullOrEmpty(cert.FriendlyName))
+                        {
+                            DomainsFriendlyName = cert.FriendlyName;
+                            config.WriteStringParameter("domainsFriendlyName", DomainsFriendlyName);
+                        }
+                }
+
+                TaskScheduled = Utils.IsScheduledTaskCreated(DomainsFriendlyName);
                 foreach (KeyValuePair<string, string> miscOpt in MiscOpts)
                 {
                     if (miscOpt.Value.All(char.IsDigit))
@@ -127,8 +171,8 @@ namespace WinCertes
             Console.WriteLine("Renewal Delay:\t" + RenewalDelay + " days");
             Console.WriteLine("Task Scheduled:\t" + (Utils.IsScheduledTaskCreated() ? "yes" : "no"));
             Console.WriteLine("Cert Enrolled:\t" + (config.isThereConfigParam("certSerial") ? "yes" : "no"));
-            string extras = config.getExtrasConfigParams();
-            if (!string.IsNullOrEmpty(extras)) Console.WriteLine("Extra Configs:\t" + extras);
+            IList<int> extras = config.getExtrasConfigParams();
+            if (extras.Count > 0) Console.WriteLine("Extra Configs:\t" + string.Join(", ", extras.Select(n => n.ToString()).ToArray()));
         }
     }
 
@@ -210,9 +254,12 @@ namespace WinCertes
                 + "request the certificate for test1.example.com and test2.example.com, then import it into\n"
                 + "Windows Certificate store (machine context), and finally set a Scheduled Task to manage renewal.\n\n"
                 + "\"WinCertes.exe -d test1.example.com -d test2.example.com -r\" will revoke that certificate.";
+            string guiAvailable = "\n\nAlternatively, you can use the GUI by running \"WinCertes.GUI.exe\" or running WinCertes from \n"
+                + "the Start Menu as an Administrator (Ctrl + Shift Click the icon if it doesn't start as Administrator).";
             Console.WriteLine("WinCertes.exe:" + message);
             options.WriteOptionDescriptions(Console.Out);
             Console.WriteLine(exampleUsage);
+            Console.WriteLine(guiAvailable);
         }
 
         /// <summary>
@@ -255,8 +302,10 @@ namespace WinCertes
             // Here we revoke from ACME Service. Note that any error is already handled into the wrapper
             if (Task.Run(() => _certesWrapper.RevokeCertificate(cert, revoke)).GetAwaiter().GetResult())
             {
-                _config.DeleteParameter("CertExpDate" + Utils.DomainsToHostId(domains));
-                _config.DeleteParameter("CertSerial" + Utils.DomainsToHostId(domains));
+                // Fix Capital letter!
+                _config.DeleteParameter("certExpDate" + Utils.DomainsToHostId(domains));
+                _config.DeleteParameter("certSerial" + Utils.DomainsToHostId(domains));
+                _config.DeleteParameter("domainsHostId");
                 X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
                 store.Open(OpenFlags.ReadWrite);
                 store.Remove(cert);
@@ -309,8 +358,11 @@ namespace WinCertes
         {
             // and we write its expiration date to the WinCertes configuration, into "InvariantCulture" date format
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            _config.WriteStringParameter("certExpDate" + Utils.DomainsToHostId(domains), certificate.GetExpirationDateString());
-            _config.WriteStringParameter("certSerial" + Utils.DomainsToHostId(domains), certificate.GetSerialNumberString());
+            var domainsHostId = Utils.DomainsToHostId(domains);
+            _config.WriteStringParameter("domainsHostId", domainsHostId);
+            _config.WriteStringParameter("domainsFriendlyName", Utils.DomainsToFriendlyName(domains));
+            _config.WriteStringParameter("certExpDate" + domainsHostId, certificate.GetExpirationDateString());
+            _config.WriteStringParameter("certSerial" + domainsHostId, certificate.GetSerialNumberString());
         }
 
         /// <summary>

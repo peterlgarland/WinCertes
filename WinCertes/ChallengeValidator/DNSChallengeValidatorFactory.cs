@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace WinCertes.ChallengeValidator
 {
-    class DNSChallengeValidatorFactory
+    /// <summary>
+    /// Gets the appropriate DNS Chalenge method, made public so GUI can access
+    /// </summary>
+    public class DNSChallengeValidatorFactory
     {
         /// <summary>
         /// Builds the DNS Challenge validator. For now only ACME DNS is supported.

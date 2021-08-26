@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using NLog;
 using System;
+using System.Collections.Generic;
 using System.Security.AccessControl;
 using System.Security.Principal;
 
@@ -184,6 +185,25 @@ namespace WinCertes
         }
 
         /// <summary>
+        /// Aims at handling flags with configuration parameter. Deletes the flag
+        /// </summary>
+        /// <param name="parameter">the flag</param>
+        /// <param name="value">the flag's value</param>
+        /// <returns>the flag's value</returns>
+        public bool WriteBooleanParameter(string parameter, bool value)
+        {
+            if (value)
+            {
+                WriteIntParameter(parameter, 1);
+            }
+            else
+            {
+                 DeleteParameter(parameter);
+            }
+            return (ReadIntParameter(parameter, 0) == 1);
+        }
+
+        /// <summary>
         /// Aims at handling flags with configuration parameter. Once a flag has been set to true, it's written forever in the configuration
         /// </summary>
         /// <param name="parameter">the flag</param>
@@ -206,10 +226,13 @@ namespace WinCertes
         {
             if (OperatingSystem.IsWindows())
             {
-                RegistryKey key = Registry.LocalMachine.OpenSubKey(_subKey, true);
-                if (key != null)
+                if (isThereConfigParam(parameter))
                 {
-                    key.DeleteValue(parameter);
+                    RegistryKey key = Registry.LocalMachine.OpenSubKey(_subKey, true);
+                    if (key != null)
+                    {
+                        key.DeleteValue(parameter);
+                    }
                 }
             }
         }
@@ -231,37 +254,55 @@ namespace WinCertes
             return false;
         }
 
-                /// <summary>
-        /// Deletes all WinCertes parameters from configuration
+        /// <summary>
+        /// Deletes all WinCertes parameters from configuration, or a speicifc extra configuration
         /// </summary>
-        public void DeleteAllParameters()
+        public void DeleteAllParameters(int extra = -1)
         {
             if (OperatingSystem.IsWindows())
             {
-                if (Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes").OpenSubKey("extra") != null)
+                // If delete all Config or Extra Config 1
+                if (extra == -1 || extra == 1)
                 {
-                    Registry.LocalMachine.OpenSubKey(_subKey, true).DeleteSubKeyTree("extra");
+                    if (Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes").OpenSubKey("extra") != null)
+                    {
+                        Registry.LocalMachine.OpenSubKey("SOFTWARE\\WinCertes", true).DeleteSubKeyTree("extra");
+                    }
                 }
-                foreach (string subKey in Registry.LocalMachine.OpenSubKey(_subKey).GetSubKeyNames())
+
+                // If delete all Config, run through all keys
+                if (extra == -1)
                 {
-                    if (Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes").OpenSubKey(subKey) != null)
-                        Registry.LocalMachine.OpenSubKey(_subKey, true).DeleteSubKeyTree(subKey);
+                    foreach (string subKey in Registry.LocalMachine.OpenSubKey(_subKey).GetSubKeyNames())
+                    {
+                        if (Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes").OpenSubKey(subKey) != null)
+                            Registry.LocalMachine.OpenSubKey("SOFTWARE\\WinCertes", true).DeleteSubKeyTree(subKey);
+                    }
+                    foreach (string key in Registry.LocalMachine.OpenSubKey(_subKey).GetValueNames())
+                    {
+                        DeleteParameter(key);
+                    }
                 }
-                foreach (string key in Registry.LocalMachine.OpenSubKey(_subKey).GetValueNames())
+                else
                 {
-                    DeleteParameter(key);
+                    // just delete the extra key
+                    var key = $"extra{extra}";
+                    if (Registry.LocalMachine.OpenSubKey("SOFTWARE").OpenSubKey("WinCertes").OpenSubKey(key) != null)
+                    {
+                        Registry.LocalMachine.OpenSubKey("SOFTWARE\\WinCertes", true).DeleteSubKeyTree(key);
+                    }
                 }
             }
         }
+
 
         /// <summary>
         /// Gets the number of Extras in the configuration
         /// </summary>
         /// <returns>string list of the Extra numbers</returns>
-        public string getExtrasConfigParams()
+        public IList<int> getExtrasConfigParams()
         {
-            string output = "";
-            bool flag = false;
+            var list = new List<int>();
 
             if (OperatingSystem.IsWindows())
             {
@@ -269,20 +310,39 @@ namespace WinCertes
                 {
                     if (subKey.StartsWith("extra"))
                     {
-                        if (flag)
-                            output += ", ";
-                        else
-                            flag = true;
-
                         if (subKey.Length == 5)
-                            output += "1";
+                            list.Add(1);
                         else
-                            output += subKey.Substring(5);
+                        {
+                            if (int.TryParse(subKey.Substring(5), out var extra))
+                                list.Add(extra);
+                        }
                     }
 
                 }
             }
-            return output;
+            list.Sort();
+            return list;
         }
+
+        /// <summary>
+        /// Gets the DomainsToHostId for Certificates in the Registry
+        /// </summary>
+        /// <returns>string list of the DomainsToHostIds</returns>
+        public IList<string> getCertificateParams(string startsWith)
+        {
+            var list = new List<string>();
+
+            if (OperatingSystem.IsWindows())
+            {
+                foreach (string key in Registry.LocalMachine.OpenSubKey(_subKey).GetValueNames())
+                {
+                    if (key.StartsWith(startsWith))
+                        list.Add(key.Substring(startsWith.Length));
+                }
+            }
+            return list;
+        }
+
     }
 }

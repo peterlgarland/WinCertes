@@ -4,6 +4,9 @@ using System.Net.NetworkInformation;
 
 namespace WinCertes.ChallengeValidator
 {
+    /// <summary>
+    /// Gets the appropriate HTTP Chalenge method, made public so GUI can access
+    /// </summary>
     public class HTTPChallengeValidatorFactory
     {
         private static readonly ILogger logger = LogManager.GetLogger("WinCertes.ChallengeValidator.HTTPChallengeValidatorFactory");
@@ -26,7 +29,12 @@ namespace WinCertes.ChallengeValidator
             return challengeValidator;
         }
 
-        private static bool CheckAvailableServerPort(int port)
+        /// <summary>
+        /// Checks the Port is not in use
+        /// </summary>
+        /// <param name="port">Port to check</param>
+        /// <returns>Result of whether its Available, i.e. False = In Use</returns>
+        public static bool CheckAvailableServerPort(int port)
         {
             bool isAvailable = true;
             IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
