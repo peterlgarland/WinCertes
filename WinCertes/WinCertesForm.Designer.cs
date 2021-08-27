@@ -1,7 +1,7 @@
 ﻿
-namespace WinCertes.GUI
+namespace WinCertes
 {
-    partial class MainForm
+    partial class WinCertesForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -29,6 +29,7 @@ namespace WinCertes.GUI
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WinCertesForm));
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.iisGroupBox = new System.Windows.Forms.GroupBox();
             this.iisPortNumericUpDown = new System.Windows.Forms.NumericUpDown();
@@ -226,7 +227,7 @@ namespace WinCertes.GUI
             this.domainsGroupBox.Size = new System.Drawing.Size(1324, 294);
             this.domainsGroupBox.TabIndex = 37;
             this.domainsGroupBox.TabStop = false;
-            this.domainsGroupBox.Text = "Domains";
+            this.domainsGroupBox.Text = "Domains*";
             // 
             // label4
             // 
@@ -652,7 +653,7 @@ namespace WinCertes.GUI
             this.newConfigButton.UseVisualStyleBackColor = true;
             this.newConfigButton.Click += new System.EventHandler(this.newConfigButton_Click);
             // 
-            // MainForm
+            // WinCertesForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 32F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -672,7 +673,8 @@ namespace WinCertes.GUI
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.domainsGroupBox);
-            this.Name = "MainForm";
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "WinCertesForm";
             this.Text = "WinCertes";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.iisGroupBox.ResumeLayout(false);

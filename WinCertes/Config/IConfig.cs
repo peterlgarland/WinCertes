@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace WinCertes
+namespace WinCertes.Config
 {
     /// <summary>
     /// Interface to Configuration Engine

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Security.AccessControl;
 using System.Security.Principal;
 
-namespace WinCertes
+namespace WinCertes.Config
 {
     /// <summary>
     /// Configuration class, managing WinCertes configuration into Windows Registry

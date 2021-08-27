@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WinCertes.Config;
 
 namespace WinCertes.ChallengeValidator
 {
     /// <summary>
     /// Gets the appropriate DNS Chalenge method, made public so GUI can access
     /// </summary>
-    public class DNSChallengeValidatorFactory
+    class DNSChallengeValidatorFactory
     {
         /// <summary>
         /// Builds the DNS Challenge validator. For now only ACME DNS is supported.

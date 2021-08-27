@@ -11,6 +11,9 @@ using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using WinCertes.ChallengeValidator;
+using System.Windows.Forms;
+using WinCertes.Config;
+using System.Runtime.InteropServices;
 
 namespace WinCertes
 {
@@ -119,12 +122,12 @@ namespace WinCertes
                 // This is also to upgrade 1.5.0 or below clients for the GUI (basically get the Friendly name from the Certificate)
                 if (string.IsNullOrEmpty(DomainsFriendlyName) && !string.IsNullOrEmpty(CertSerial))
                 {
-                        var cert = Utils.GetCertificateBySerial(CertSerial);
-                        if (cert != null && !string.IsNullOrEmpty(cert.FriendlyName))
-                        {
-                            DomainsFriendlyName = cert.FriendlyName;
-                            config.WriteStringParameter("domainsFriendlyName", DomainsFriendlyName);
-                        }
+                    var cert = Utils.GetCertificateBySerial(CertSerial);
+                    if (cert != null && !string.IsNullOrEmpty(cert.FriendlyName))
+                    {
+                        DomainsFriendlyName = cert.FriendlyName;
+                        config.WriteStringParameter("domainsFriendlyName", DomainsFriendlyName);
+                    }
                 }
 
                 TaskScheduled = Utils.IsScheduledTaskCreated(DomainsFriendlyName);
@@ -178,6 +181,13 @@ namespace WinCertes
 
     class Program
     {
+        /// <summary>
+        /// Import to free the Console Window when the windows form runs from Explorer
+        /// </summary>
+        /// <returns></returns>
+        [DllImport("kernel32.dll")]
+        static extern IntPtr FreeConsole();
+
         private static readonly ILogger _logger = LogManager.GetLogger("WinCertes");
 
         private static CertesWrapper _certesWrapper;
@@ -203,6 +213,7 @@ namespace WinCertes
         private static bool HandleOptions(string[] args)
         {
             _domains = new List<string>();
+            bool _help = false;
             _winCertesOptions.MiscOpts = new Dictionary<string, string>();
 
             // Options that can be used by this application
@@ -222,6 +233,7 @@ namespace WinCertes
                 { "k|csp=", "import the certificate into specified csp. By default WinCertes imports in the default CSP.", v => _winCertesOptions.Csp = v },
                 { "t|renewal=", "trigger certificate renewal {N} days before expiration, default 30", (int v) => _winCertesOptions.RenewalDelay = v },
                 { "l|listenport=", "listen on port {N} in standalone mode (for use with -a switch, default 80)", (int v) => _winCertesOptions.HttpPort = v },
+                { "h|?|help", "displays this help screen", (v => _help = (v != null)) },
                 { "show", "show current configuration parameters", v=> _show = (v != null ) },
                 { "reset", "reset all configuration parameters", v=> _reset = (v != null ) },
                 { "extra:", "manages additional certificate(s) instead of the default one, with its own settings. Add an integer index optionally to manage more certs.", (int v) => _extra = v },
@@ -236,6 +248,7 @@ namespace WinCertes
                 res = _options.Parse(args);
             }
             catch (Exception e) { WriteErrorMessageWithUsage(_options, e.Message); return false; }
+            if (_help) { WriteErrorMessageWithUsage(_options, "Use no command line arguments to launch the GUI."); return false; }
             if ((!_show) && (!_reset) && (_domains.Count == 0)) { WriteErrorMessageWithUsage(_options, "At least one domain must be specified"); return false; }
             if (_winCertesOptions.Revoke > 5) { WriteErrorMessageWithUsage(_options, "Revocation Reason is a number between 0 and 5"); return false; }
             _domains = _domains.ConvertAll(d => d.ToLower());
@@ -254,12 +267,9 @@ namespace WinCertes
                 + "request the certificate for test1.example.com and test2.example.com, then import it into\n"
                 + "Windows Certificate store (machine context), and finally set a Scheduled Task to manage renewal.\n\n"
                 + "\"WinCertes.exe -d test1.example.com -d test2.example.com -r\" will revoke that certificate.";
-            string guiAvailable = "\n\nAlternatively, you can use the GUI by running \"WinCertes.GUI.exe\" or running WinCertes from \n"
-                + "the Start Menu as an Administrator (Ctrl + Shift Click the icon if it doesn't start as Administrator).";
             Console.WriteLine("WinCertes.exe:" + message);
             options.WriteOptionDescriptions(Console.Out);
             Console.WriteLine(exampleUsage);
-            Console.WriteLine(guiAvailable);
         }
 
         /// <summary>
@@ -396,8 +406,26 @@ namespace WinCertes
             _logger.Info($"Removed files from filesystem: {pfx.PfxFullPath}, {pfx.PemCertPath}, {pfx.PemKeyPath}");
         }
 
+        /// <summary>
+        ///  The main entry point for the application.
+        /// </summary>
+        [STAThread]
         static int Main(string[] args)
         {
+            // If No Parameters show the GUI and hide the console.
+            if (args.Length == 0 && OperatingSystem.IsWindows())
+            {
+                Console.WriteLine("WinCertes.exe: Launched without command line options, use -? to display them. Launching GUI...");
+                Application.SetHighDpiMode(HighDpiMode.SystemAware);
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                if (!Utils.IsAdministrator()) { MessageBox.Show("WinCertes.GUI.exe must be launched as Administrator.\r\nHold down the Ctrl and Shift keys whilst you Click the WinCertes icon in the Start Menu.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); return ERROR; }
+                // This hides the Console if ran from Explorer.
+                FreeConsole();
+                Application.Run(new WinCertesForm());
+                return 0;
+            }
+
             // Main parameters with their default values
             string taskName = null;
             _winCertesOptions = new WinCertesOptions();

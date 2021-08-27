@@ -5,7 +5,7 @@ WinCertes is a simple ACMEv2 Client for Windows, able to manage the automatic is
 ![GPLv3 License](https://www.gnu.org/graphics/gplv3-88x31.png)
 
 Requirements:
-- Windows with .NET 5.0 Runtime, 64-bit
+- Windows with .NET 5.0 Runtime and .NET 5.0 Desktop Runtime for GUI, 64-bit (x64)
 
 Features:
 - CLI-based for easy integration with DevOps
@@ -107,6 +107,7 @@ Command Line Options
                                expiration, default 30
   -l, --listenport=N         listen on port N in standalone mode (for use with -
                                a switch, default 80)
+  -h, -?, --help             displays this help screen.
       --show                 show current configuration parameters
       --reset                reset all configuration parameters
       --extra[=VALUE]        manages additional certificate(s) instead of the

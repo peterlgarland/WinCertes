@@ -16,12 +16,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using WinCertes;
 using WinCertes.ChallengeValidator;
+using WinCertes.Config;
 
-namespace WinCertes.GUI
+namespace WinCertes
 {
-    public partial class MainForm : Form
+    public partial class WinCertesForm : Form
     {
         SiteCollection Sites;
         Site IisSite;
@@ -34,7 +34,7 @@ namespace WinCertes.GUI
         readonly string _certTmpPath;
         bool _iisBound = false;
 
-        public MainForm()
+        public WinCertesForm()
         {
             (_winCertesPath, _certTmpPath) = InitWinCertesDirectoryPath();
             InitializeComponent();

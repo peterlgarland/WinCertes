@@ -5,6 +5,7 @@ using System.Linq;
 using System.Management;
 using System.Text;
 using System.Threading.Tasks;
+using WinCertes.Config;
 
 namespace WinCertes.ChallengeValidator
 {
