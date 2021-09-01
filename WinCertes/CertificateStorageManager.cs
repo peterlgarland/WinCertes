@@ -7,22 +7,22 @@ namespace WinCertes
 {
     public class CertificateStorageManager
     {
-        private static readonly ILogger logger = LogManager.GetLogger("WinCertes.CertificateStorageManager");
+        private static readonly ILogger _logger = LogManager.GetLogger("WinCertes.CertificateStorageManager");
 
         public AuthenticatedPFX AuthenticatedPFX { get; set; }
         public X509Certificate2 Certificate { get; set; }
-        private bool DefaultCSP { get; set; }
+        private readonly bool _defaultCSP;
 
         /// <summary>
         /// Class constructor
         /// </summary>
         /// <param name="authenticatedPFX">the PFX that we will store</param>
-        /// <param name="defaultCSP">do we use the default CSP to store the certificate?</param>
-        public CertificateStorageManager(AuthenticatedPFX authenticatedPFX, bool defaultCSP)
+        /// <param name="useDefaultCSP">do we use the default CSP to store the certificate?</param>
+        public CertificateStorageManager(AuthenticatedPFX authenticatedPFX, bool useDefaultCSP)
         {
             AuthenticatedPFX = authenticatedPFX;
             Certificate = null;
-            DefaultCSP = defaultCSP;
+            _defaultCSP = useDefaultCSP;
         }
 
         /// <summary>
@@ -34,13 +34,13 @@ namespace WinCertes
                 // If we use the default CSP, then the key should be persisted as local machine while we parse the certificate
                 X509KeyStorageFlags flags = X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet;
                 // else it should be left non-persistent so that it can disappear after treatment
-                if (!DefaultCSP) {
-                    logger.Debug("Not using default CSP: not importing into store.");
+                if (!_defaultCSP) {
+                    _logger.Debug("Not using default CSP: not importing into store.");
                     flags = X509KeyStorageFlags.DefaultKeySet | X509KeyStorageFlags.Exportable; 
                 }
                 Certificate = new X509Certificate2(AuthenticatedPFX.PfxFullPath, AuthenticatedPFX.PfxPassword, flags);
             } catch (Exception e) {
-                logger.Error($"Impossible to extract certificate from PFX: {e.Message}");
+                _logger.Error($"Impossible to extract certificate from PFX: {e.Message}");
             }
         }
 
@@ -49,13 +49,13 @@ namespace WinCertes
         /// </summary>
         public void ImportCertificateIntoDefaultCSP()
         {
-            if (Certificate == null) { logger.Error("No certificate to import."); return; }
+            if (Certificate == null) { _logger.Error("No certificate to import."); return; }
             try {
                 X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
                 store.Open(OpenFlags.ReadWrite);
                 store.Add(Certificate);
                 store.Close();
-                logger.Info($"Stored certificate with DN {Certificate.Subject} into Windows Personal Local Machine store");
+                _logger.Info($"Stored certificate with DN {Certificate.Subject} into Windows Personal Local Machine store");
                 // Now let's try to import the full chain
                 try {
                     X509Certificate2Collection certCol = new X509Certificate2Collection();
@@ -70,7 +70,7 @@ namespace WinCertes
                     }
                 } catch (Exception) { /* discarded as it's not so important if it fails */ }
             } catch (Exception e) {
-                logger.Error(e,$"Impossible to import certificate into Default CSP: {e.Message}");
+                _logger.Error(e,$"Impossible to import certificate into Default CSP: {e.Message}");
             }
         }
 
@@ -93,14 +93,14 @@ namespace WinCertes
                     output += process.StandardOutput.ReadLine() + "\n";
                 }
                 process.WaitForExit();
-                logger.Debug(output);
+                _logger.Debug(output);
                 if (output.Contains("FAILED")) {
-                    logger.Error($"Impossible to import certificate into KSP {KSP}: {output}");
+                    _logger.Error($"Impossible to import certificate into KSP {KSP}: {output}");
                 } else {
-                    logger.Info($"Successfully imported certificate into KSP {KSP}");
+                    _logger.Info($"Successfully imported certificate into KSP {KSP}");
                 }
             } catch (Exception e) {
-                logger.Error($"Impossible to import certificate into KSP {KSP}: {e.Message}");
+                _logger.Error($"Impossible to import certificate into KSP {KSP}: {e.Message}");
             }
         }
 

@@ -32,13 +32,14 @@ namespace WinCertes
     public class CertesWrapper
     {
         public string PfxPassword { get; set; }
-        private static readonly ILogger logger = LogManager.GetLogger("WinCertes.CertesWrapper");
-        private IConfig _config;
-        private CertesSettings _settings;
+
+        private static readonly ILogger _logger = LogManager.GetLogger("WinCertes.CertesWrapper");
+        private readonly IConfig _config;
+        private readonly CertesSettings _settings;
         private AcmeContext _acme;
         private IOrderContext _orderCtx = null;
-        private HttpClient _httpClient = null;
-        private int _keySize = 2048;
+        private readonly HttpClient _httpClient = null;
+        private readonly int _keySize = 2048;
 
         /// <summary>
         /// Initializes Certes library context
@@ -60,7 +61,7 @@ namespace WinCertes
 
             // Let's initialize the password
             PfxPassword = Guid.NewGuid().ToString("N").Substring(0, 16);
-            logger.Debug($"PFX password will be: {PfxPassword}");
+            _logger.Debug($"PFX password will be: {PfxPassword}");
 
             // Dealing with Server URI
             if (serviceUri != null)
@@ -106,7 +107,7 @@ namespace WinCertes
         /// </summary>
         /// <param name="exp">the exception to process</param>
         /// <returns>the error messages concatenated as string</returns>
-        private string ProcessCertesException(Exception exp)
+        private static string ProcessCertesException(Exception exp)
         {
             string errorMessage = exp.Message;
             if (exp.InnerException != null)
@@ -130,13 +131,13 @@ namespace WinCertes
                 InitCertes();
                 IAccountContext accountCtx = await _acme.NewAccount(_settings.AccountEmail, true);
                 _config.WriteIntParameter("registered", 1);
-                logger.Info($"Successfully registered account {_settings.AccountEmail} with certificate authority {_settings.ServiceURI.ToString()}");
-                if ((directory.Meta != null) && (directory.Meta.TermsOfService != null)) logger.Info($"Please check the ACME Service ToS at: {directory.Meta.TermsOfService.ToString()}");
+                _logger.Info($"Successfully registered account {_settings.AccountEmail} with certificate authority {_settings.ServiceURI.ToString()}");
+                if ((directory.Meta != null) && (directory.Meta.TermsOfService != null)) _logger.Info($"Please check the ACME Service ToS at: {directory.Meta.TermsOfService.ToString()}");
                 return true;
             }
             catch (Exception exp)
             {
-                logger.Error($"Failed to register account {_settings.AccountEmail} with certificate authority {_settings.ServiceURI.ToString()}: {ProcessCertesException(exp)}");
+                _logger.Error($"Failed to register account {_settings.AccountEmail} with certificate authority {_settings.ServiceURI.ToString()}: {ProcessCertesException(exp)}");
                 return false;
             }
         }
@@ -174,13 +175,13 @@ namespace WinCertes
                     await ValidateAuthz(authz, httpChallengeValidator, dnsChallengeValidator);
                 }
                 // If we are here, it means order was properly created, and authorizations & challenges were properly verified.
-                logger.Info($"Generated orders and validated challenges for domains: {String.Join(",", domains)}");
+                _logger.Info($"Generated orders and validated challenges for domains: {String.Join(",", domains)}");
                 return true;
             }
             catch (Exception exp)
             {
-                logger.Debug(exp, "Error while trying to register and validate order");
-                logger.Error($"Failed to register and validate order with CA: {ProcessCertesException(exp)}");
+                _logger.Debug(exp, "Error while trying to register and validate order");
+                _logger.Error($"Failed to register and validate order with CA: {ProcessCertesException(exp)}");
                 return false;
             }
         }
@@ -202,7 +203,7 @@ namespace WinCertes
                 var dnsChallenge = await authz.Dns();
                 if (dnsChallenge != null)
                 {
-                    logger.Debug($"Initiating DNS Validation for {res.Identifier.Value}");
+                    _logger.Debug($"Initiating DNS Validation for {res.Identifier.Value}");
                     var resValidation = await ValidateDNSChallenge(res.Identifier.Value, dnsChallenge, dnsChallengeValidator);
                     if (!resValidation) throw new Exception($"Could not validate DNS challenge:\n {dnsChallenge.Resource().Result.Error.Detail}");
                 }
@@ -214,7 +215,7 @@ namespace WinCertes
                 var httpChallenge = await authz.Http();
                 if (httpChallenge != null)
                 {
-                    logger.Debug($"Initiating HTTP Validation for {res.Identifier.Value}");
+                    _logger.Debug($"Initiating HTTP Validation for {res.Identifier.Value}");
                     var resValidation = await ValidateHTTPChallenge(httpChallenge, httpChallengeValidator);
                     if (!resValidation) throw new Exception($"Could not validate HTTP challenge:\n {httpChallenge.Resource().Result.Error.Detail}");
                 }
@@ -271,7 +272,7 @@ namespace WinCertes
         /// <param name="httpChallenge"></param>
         /// <param name="challengeValidator"></param>
         /// <returns>true if validated, false otherwise</returns>
-        private async Task<bool> ValidateHTTPChallenge(IChallengeContext httpChallenge, IHTTPChallengeValidator challengeValidator)
+        private static async Task<bool> ValidateHTTPChallenge(IChallengeContext httpChallenge, IHTTPChallengeValidator challengeValidator)
         {
             // We get the resource fresh
             var httpChallengeStatus = await httpChallenge.Resource();
@@ -308,7 +309,7 @@ namespace WinCertes
         /// Retrieves the CA chain from local computer's Root store, as a PEM chain
         /// </summary>
         /// <returns>PEM chain of local computer's CA certificates</returns>
-        public byte[] GetCACertChainFromStore()
+        public static byte[] GetCACertChainFromStore()
         {
             string pemBundle = "";
 
@@ -323,7 +324,7 @@ namespace WinCertes
         /// </summary>
         /// <param name="name">the store name</param>
         /// <returns>the PEM bundle, as a string</returns>
-        private string DumpStoreContentsAsPEMBundle(StoreName name)
+        private static string DumpStoreContentsAsPEMBundle(StoreName name)
         {
             X509Store store = new X509Store(name, StoreLocation.LocalMachine);
             store.Open(OpenFlags.ReadOnly);
@@ -383,7 +384,7 @@ namespace WinCertes
 
                 // We write the PFX/PKCS#12 to file
                 System.IO.File.WriteAllBytes(pfxName, pfxBytes);
-                logger.Info($"Retrieved certificate from the CA. The certificate is in {pfxName}");
+                _logger.Info($"Retrieved certificate from the CA. The certificate is in {pfxName}");
 
                 // We write the PEMs to corresponding files
                 System.IO.File.WriteAllText(cerPath, cer);
@@ -395,7 +396,7 @@ namespace WinCertes
             }
             catch (Exception exp)
             {
-                logger.Error($"Failed to retrieve certificate from CA: {ProcessCertesException(exp)}");
+                _logger.Error($"Failed to retrieve certificate from CA: {ProcessCertesException(exp)}");
                 return null;
             }
         }
@@ -419,7 +420,7 @@ namespace WinCertes
             }
             catch (Exception exp)
             {
-                logger.Error($"Failed to revoke certificate with serial {certificate.GetSerialNumberString()} from CA: {ProcessCertesException(exp)}");
+                _logger.Error($"Failed to revoke certificate with serial {certificate.GetSerialNumberString()} from CA: {ProcessCertesException(exp)}");
                 return false;
             }
         }

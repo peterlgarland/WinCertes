@@ -14,8 +14,8 @@ namespace WinCertes.Config
     {
         private static readonly ILogger _logger = LogManager.GetLogger("WinCertes.WinCertesOptions");
 
-        private string _registryKey = @"HKEY_LOCAL_MACHINE\SOFTWARE\WinCertes";
-        private string _subKey = @"Software\WinCertes";
+        private readonly string _registryKey = @"HKEY_LOCAL_MACHINE\SOFTWARE\WinCertes";
+        private readonly string _subKey = @"Software\WinCertes";
 
         /// <summary>
         /// Class constructor. if extra = false, builds the base config. if extra = true, builds the extra certificate config.
@@ -226,7 +226,7 @@ namespace WinCertes.Config
         {
             if (OperatingSystem.IsWindows())
             {
-                if (isThereConfigParam(parameter))
+                if (IsThereConfigParam(parameter))
                 {
                     RegistryKey key = Registry.LocalMachine.OpenSubKey(_subKey, true);
                     if (key != null)
@@ -241,7 +241,7 @@ namespace WinCertes.Config
         /// Is there a configuration parameter starting with given key?
         /// </summary>
         /// <param name="startsWith">the parameter to look for</param>
-        public bool isThereConfigParam(string startsWith)
+        public bool IsThereConfigParam(string startsWith)
         {
             if (OperatingSystem.IsWindows())
             {
@@ -300,7 +300,7 @@ namespace WinCertes.Config
         /// Gets the number of Extras in the configuration
         /// </summary>
         /// <returns>string list of the Extra numbers</returns>
-        public IList<int> getExtrasConfigParams()
+        public IList<int> GetExtrasConfigParams()
         {
             var list = new List<int>();
 
@@ -329,7 +329,7 @@ namespace WinCertes.Config
         /// Gets the DomainsToHostId for Certificates in the Registry
         /// </summary>
         /// <returns>string list of the DomainsToHostIds</returns>
-        public IList<string> getCertificateParams(string startsWith)
+        public IList<string> GetCertificateParams(string startsWith)
         {
             var list = new List<string>();
 

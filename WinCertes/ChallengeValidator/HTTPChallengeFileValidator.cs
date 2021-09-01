@@ -10,9 +10,8 @@ namespace WinCertes.ChallengeValidator
     class HTTPChallengeFileValidator : IHTTPChallengeValidator
     {
         private static readonly ILogger logger = LogManager.GetLogger("WinCertes.ChallengeValidator.HTTPChallengeFileValidator");
-
-        string _challengeVerifyPath = "";
-        private bool noWellKnown = false;
+        readonly string _challengeVerifyPath;
+        private readonly bool noWellKnown = false;
 
         /// <summary>
         /// Class constructor

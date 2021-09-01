@@ -3,11 +3,8 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Security.AccessControl;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using WinCertes.ChallengeValidator;
@@ -36,7 +33,7 @@ namespace WinCertes
             Revoke = -1;
             Sni = false;
             Csp = null;
-            noCsp = false;
+            NoCsp = false;
             RenewalDelay = 30;
             HttpPort = 80;
         }
@@ -50,20 +47,47 @@ namespace WinCertes
         public bool Standalone { get; set; }
         public int Revoke { get; set; }
         public string Csp { get; set; }
-        public bool noCsp { get; set; }
+        public bool NoCsp { get; set; }
         public bool Sni { get; set; }
         public int RenewalDelay { get; set; }
         public int HttpPort { get; set; }
         public bool BindSite { get; set; }
         public bool Registered { get; set; }
         public bool PsScript { get; set; }
-        public bool PsExec { get; set; }
+        public bool PsExecPolicy { get; set; }
         public string DomainsHostId { get; set; }
         public string DomainsFriendlyName { get; set; }
         public string CertSerial { get; set; }
         public bool TaskScheduled { get; set; }
 
         public Dictionary<string, string> MiscOpts { get; set; }
+
+        /// <summary>
+        /// Checks whether the enrolled certificate should be renewed
+        /// </summary>
+        /// <param name="config">WinCertes config</param>
+        /// <returns>true if certificate must be renewed or does not exists, false otherwise</returns>
+        public bool IsThereCertificateAndIsItToBeRenewed(List<string> domains, IConfig config)
+        {
+            string certificateExpirationDate = config.ReadStringParameter("certExpDate" + Utils.DomainsToHostId(domains));
+            _logger.Debug($"Current certificate expiration date is: {certificateExpirationDate}");
+            if ((certificateExpirationDate == null) || (certificateExpirationDate.Length == 0)) return true;
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            DateTime expirationDate = DateTime.Parse(certificateExpirationDate);
+            DateTime futureThresold = DateTime.Now.AddDays(RenewalDelay == 0 ? 30 : RenewalDelay);
+            _logger.Debug($"Expiration Thresold Date after delay: {futureThresold.ToString()}");
+            if (futureThresold > expirationDate) return true;
+            _logger.Debug("Certificate exists and does not need to be renewed");
+            return false;
+        }
+
+        public bool IsCertificateToBeRenewed(X509Certificate2 cert)
+        {
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            DateTime expirationDate = DateTime.Parse(cert.GetExpirationDateString());
+            DateTime futureThresold = DateTime.Now.AddDays(RenewalDelay == 0 ? 30 : RenewalDelay);
+            return (futureThresold > expirationDate);
+        }
 
         /// <summary>
         /// Writes command line parameters into the specified config
@@ -90,7 +114,7 @@ namespace WinCertes
 
                 // Should we execute some PowerShell ? If yes, let's do some config
                 PsScript = forceWrite ? config.WriteBooleanParameter("psScript", PsScript) : config.WriteAndReadBooleanParameter("psScript", PsScript);
-                PsExec = forceWrite ? config.WriteBooleanParameter("psExec", PsExec) : config.WriteAndReadBooleanParameter("psExec", PsExec);
+                PsExecPolicy = forceWrite ? config.WriteBooleanParameter("psExec", PsExecPolicy) : config.WriteAndReadBooleanParameter("psExec", PsExecPolicy);
                 ScriptFile = config.WriteAndReadStringParameter("scriptFile", ScriptFile);
                 ScriptExecutionPolicy = config.WriteAndReadStringParameter("scriptExecPolicy", ScriptExecutionPolicy);
                 // Writing renewal delay to conf
@@ -98,7 +122,7 @@ namespace WinCertes
                 // Writing HTTP listening Port in conf
                 HttpPort = config.WriteAndReadIntParameter("httpPort", HttpPort, 0);
                 // Should we store certificate in the CSP?
-                noCsp = config.WriteAndReadBooleanParameter("noCsp", noCsp);
+                NoCsp = config.WriteAndReadBooleanParameter("noCsp", NoCsp);
                 // Let's store the CSP name, if any
                 Csp = config.WriteAndReadStringParameter("CSP", Csp);
                 // Get some Readonly parameters to help out
@@ -107,9 +131,9 @@ namespace WinCertes
                 DomainsHostId = config.ReadStringParameter("domainsHostId");
 
                 // This is to upgrade 1.5.0 or below clients for the GUI (basically get the _xxxx after certSerial) Only works if 1 Certificate has been created in the Config
-                if (string.IsNullOrEmpty(DomainsHostId) && config.isThereConfigParam("certSerial"))
+                if (string.IsNullOrEmpty(DomainsHostId) && config.IsThereConfigParam("certSerial"))
                 {
-                    IList<string> certs = config.getCertificateParams("certSerial");
+                    IList<string> certs = config.GetCertificateParams("certSerial");
                     if (certs.Count == 1)
                     {
                         DomainsHostId = certs[0];
@@ -145,9 +169,40 @@ namespace WinCertes
             }
         }
 
-        public void displayOptions(IConfig config)
+        /// <summary>
+        /// Registers certificate into configuration
+        /// </summary>
+        /// <param name="pfx"></param>
+        /// <param name="domains"></param>
+        public static void RegisterCertificateIntoConfiguration(X509Certificate2 certificate, List<string> domains, IConfig config)
         {
-            if (!config.isThereConfigParam("accountKey"))
+            // and we write its expiration date to the WinCertes configuration, into "InvariantCulture" date format
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            var domainsHostId = Utils.DomainsToHostId(domains);
+            config.WriteStringParameter("domainsHostId", domainsHostId);
+            config.WriteStringParameter("domainsFriendlyName", Utils.DomainsToFriendlyName(domains));
+            config.WriteStringParameter("certExpDate" + domainsHostId, certificate.GetExpirationDateString());
+            config.WriteStringParameter("certSerial" + domainsHostId, certificate.GetSerialNumberString());
+        }
+
+        public static void RemoveCertificateFromConfiguration(X509Certificate2 certificate, IConfig config, string domainsHostId)
+        {
+            config.DeleteParameter("certExpDate" + domainsHostId);
+            config.DeleteParameter("certSerial" + domainsHostId);
+            config.DeleteParameter("domainsHostId");
+            X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
+            store.Open(OpenFlags.ReadWrite);
+            store.Remove(certificate);
+            store.Close();
+            string task = config.ReadStringParameter("domainsFriendlyName");
+            if (task != null)
+                Utils.DeleteScheduledTasks(task);
+            config.DeleteParameter("domainsFriendlyName");
+        }
+
+        public void DisplayOptions(IConfig config)
+        {
+            if (!config.IsThereConfigParam("accountKey"))
             {
                 Console.WriteLine("WinCertes is not configured yet");
                 return;
@@ -167,14 +222,14 @@ namespace WinCertes
                 else Console.WriteLine("Web Root:\t" + WebRoot);
             }
             Console.WriteLine("IIS Bind Name:\t" + (BindName ?? "none"));
-            Console.WriteLine("SNI Ssl Flag:\t" + (config.isThereConfigParam("sni") ? "yes" : "no"));
-            Console.WriteLine("Import in CSP:\t" + (config.isThereConfigParam("noCsp") ? "no" : "yes"));
+            Console.WriteLine("SNI Ssl Flag:\t" + (config.IsThereConfigParam("sni") ? "yes" : "no"));
+            Console.WriteLine("Import in CSP:\t" + (config.IsThereConfigParam("noCsp") ? "no" : "yes"));
             Console.WriteLine("PS Script File:\t" + (ScriptFile ?? "none"));
             Console.WriteLine("PS Exec Policy:\t" + (ScriptExecutionPolicy ?? "undefined"));
             Console.WriteLine("Renewal Delay:\t" + RenewalDelay + " days");
             Console.WriteLine("Task Scheduled:\t" + (Utils.IsScheduledTaskCreated() ? "yes" : "no"));
-            Console.WriteLine("Cert Enrolled:\t" + (config.isThereConfigParam("certSerial") ? "yes" : "no"));
-            IList<int> extras = config.getExtrasConfigParams();
+            Console.WriteLine("Cert Enrolled:\t" + (config.IsThereConfigParam("certSerial") ? "yes" : "no"));
+            IList<int> extras = config.GetExtrasConfigParams();
             if (extras.Count > 0) Console.WriteLine("Extra Configs:\t" + string.Join(", ", extras.Select(n => n.ToString()).ToArray()));
         }
     }
@@ -186,7 +241,7 @@ namespace WinCertes
         /// </summary>
         /// <returns></returns>
         [DllImport("kernel32.dll")]
-        static extern IntPtr FreeConsole();
+        private static extern IntPtr FreeConsole();
 
         private static readonly ILogger _logger = LogManager.GetLogger("WinCertes");
 
@@ -237,7 +292,7 @@ namespace WinCertes
                 { "show", "show current configuration parameters", v=> _show = (v != null ) },
                 { "reset", "reset all configuration parameters", v=> _reset = (v != null ) },
                 { "extra:", "manages additional certificate(s) instead of the default one, with its own settings. Add an integer index optionally to manage more certs.", (int v) => _extra = v },
-                { "no-csp", "does not import the certificate into CSP. Use with caution, at your own risks. REVOCATION WILL NOT WORK IN THAT MODE.", v=> _winCertesOptions.noCsp = (v != null) },
+                { "no-csp", "does not import the certificate into CSP. Use with caution, at your own risks. REVOCATION WILL NOT WORK IN THAT MODE.", v=> _winCertesOptions.NoCsp = (v != null) },
                 { "setopt={:}", "sets configuration options in the form key:value.", (k,v) => _winCertesOptions.MiscOpts.Add(k,v)  }
             };
 
@@ -267,28 +322,9 @@ namespace WinCertes
                 + "request the certificate for test1.example.com and test2.example.com, then import it into\n"
                 + "Windows Certificate store (machine context), and finally set a Scheduled Task to manage renewal.\n\n"
                 + "\"WinCertes.exe -d test1.example.com -d test2.example.com -r\" will revoke that certificate.";
-            Console.WriteLine("WinCertes.exe:" + message);
+            Console.WriteLine("WinCertes.exe: " + message);
             options.WriteOptionDescriptions(Console.Out);
             Console.WriteLine(exampleUsage);
-        }
-
-        /// <summary>
-        /// Checks whether the enrolled certificate should be renewed
-        /// </summary>
-        /// <param name="config">WinCertes config</param>
-        /// <returns>true if certificate must be renewed or does not exists, false otherwise</returns>
-        private static bool IsThereCertificateAndIsItToBeRenewed(List<string> domains)
-        {
-            string certificateExpirationDate = _config.ReadStringParameter("certExpDate" + Utils.DomainsToHostId(domains));
-            _logger.Debug($"Current certificate expiration date is: {certificateExpirationDate}");
-            if ((certificateExpirationDate == null) || (certificateExpirationDate.Length == 0)) return true;
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            DateTime expirationDate = DateTime.Parse(certificateExpirationDate);
-            DateTime futureThresold = DateTime.Now.AddDays(_config.ReadIntParameter("renewalDays", 30));
-            _logger.Debug($"Expiration Thresold Date after delay: {futureThresold.ToString()}");
-            if (futureThresold > expirationDate) return true;
-            _logger.Debug("Certificate exists and does not need to be renewed");
-            return false;
         }
 
         /// <summary>
@@ -312,67 +348,9 @@ namespace WinCertes
             // Here we revoke from ACME Service. Note that any error is already handled into the wrapper
             if (Task.Run(() => _certesWrapper.RevokeCertificate(cert, revoke)).GetAwaiter().GetResult())
             {
-                // Fix Capital letter!
-                _config.DeleteParameter("certExpDate" + Utils.DomainsToHostId(domains));
-                _config.DeleteParameter("certSerial" + Utils.DomainsToHostId(domains));
-                _config.DeleteParameter("domainsHostId");
-                X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
-                store.Open(OpenFlags.ReadWrite);
-                store.Remove(cert);
-                store.Close();
+                WinCertesOptions.RemoveCertificateFromConfiguration(cert, _config, Utils.DomainsToHostId(domains));
                 _logger.Info($"Certificate with serial {serial} for domains {String.Join(",", domains)} has been successfully revoked");
             }
-        }
-
-        /// <summary>
-        /// Initializes WinCertes Directory path on the filesystem
-        /// </summary>
-        private static void InitWinCertesDirectoryPath()
-        {
-            _winCertesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "WinCertes");
-            if (!System.IO.Directory.Exists(_winCertesPath))
-            {
-                System.IO.Directory.CreateDirectory(_winCertesPath);
-            }
-            _certTmpPath = Path.Combine(_winCertesPath, "CertsTmp");
-            if (!System.IO.Directory.Exists(_certTmpPath))
-            {
-                System.IO.Directory.CreateDirectory(_certTmpPath);
-            }
-            // We fix the permissions for the certs temporary directory
-            // so that no user can have access to it
-            DirectoryInfo winCertesTmpDi = new DirectoryInfo(_certTmpPath);
-            DirectoryInfo programDataDi = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
-            if (OperatingSystem.IsWindows())
-            {
-                DirectorySecurity programDataDs = programDataDi.GetAccessControl(AccessControlSections.All);
-                DirectorySecurity winCertesTmpDs = winCertesTmpDi.GetAccessControl(AccessControlSections.All);
-                winCertesTmpDs.SetAccessRuleProtection(true, false);
-                foreach (FileSystemAccessRule accessRule in programDataDs.GetAccessRules(true, true, typeof(NTAccount)))
-                {
-                    if (accessRule.IdentityReference.Value.IndexOf("Users", StringComparison.InvariantCultureIgnoreCase) < 0)
-                    {
-                        winCertesTmpDs.AddAccessRule(accessRule);
-                    }
-                }
-                winCertesTmpDi.SetAccessControl(winCertesTmpDs);
-            }
-        }
-
-        /// <summary>
-        /// Registers certificate into configuration
-        /// </summary>
-        /// <param name="pfx"></param>
-        /// <param name="domains"></param>
-        private static void RegisterCertificateIntoConfiguration(X509Certificate2 certificate, List<string> domains)
-        {
-            // and we write its expiration date to the WinCertes configuration, into "InvariantCulture" date format
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            var domainsHostId = Utils.DomainsToHostId(domains);
-            _config.WriteStringParameter("domainsHostId", domainsHostId);
-            _config.WriteStringParameter("domainsFriendlyName", Utils.DomainsToFriendlyName(domains));
-            _config.WriteStringParameter("certExpDate" + domainsHostId, certificate.GetExpirationDateString());
-            _config.WriteStringParameter("certSerial" + domainsHostId, certificate.GetSerialNumberString());
         }
 
         /// <summary>
@@ -395,18 +373,6 @@ namespace WinCertes
         }
 
         /// <summary>
-        /// Removes specified files and logs it
-        /// </summary>
-        /// <param name="path"></param>
-        private static void RemoveFileAndLog(AuthenticatedPFX pfx)
-        {
-            File.Delete(pfx.PfxFullPath);
-            File.Delete(pfx.PemCertPath);
-            File.Delete(pfx.PemKeyPath);
-            _logger.Info($"Removed files from filesystem: {pfx.PfxFullPath}, {pfx.PemCertPath}, {pfx.PemKeyPath}");
-        }
-
-        /// <summary>
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
@@ -419,7 +385,7 @@ namespace WinCertes
                 Application.SetHighDpiMode(HighDpiMode.SystemAware);
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                if (!Utils.IsAdministrator()) { MessageBox.Show("WinCertes.GUI.exe must be launched as Administrator.\r\nHold down the Ctrl and Shift keys whilst you Click the WinCertes icon in the Start Menu.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); return ERROR; }
+                if (!Utils.IsAdministrator()) { MessageBox.Show("WinCertes.exe: Must be launched as Administrator.\nHold down the Ctrl and Shift keys whilst you Click the WinCertes icon in the Start Menu.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); return ERROR; }
                 // This hides the Console if ran from Explorer.
                 FreeConsole();
                 Application.Run(new WinCertesForm());
@@ -430,22 +396,31 @@ namespace WinCertes
             string taskName = null;
             _winCertesOptions = new WinCertesOptions();
 
-            if (!Utils.IsAdministrator()) { Console.WriteLine("WinCertes.exe must be launched as Administrator"); return ERROR; }
+            if (!Utils.IsAdministrator()) { Console.WriteLine("WinCertes.exe: Must be launched as Administrator"); return ERROR; }
             // Command line options handling and initialization stuff
             if (!HandleOptions(args)) return ERROR_INCORRECT_PARAMETER;
             if (_periodic) taskName = Utils.DomainsToFriendlyName(_domains);
-            InitWinCertesDirectoryPath();
+            (_winCertesPath, _certTmpPath) = Utils.InitWinCertesDirectoryPath();
             Utils.ConfigureLogger(_winCertesPath);
             _config = new RegistryConfig(_extra);
             _winCertesOptions.WriteOptionsIntoConfiguration(_config);
-            if (_show) { _winCertesOptions.displayOptions(_config); return 0; }
+            if (_show) { _winCertesOptions.DisplayOptions(_config); return 0; }
 
-            // Reset is a full reset !
+            // Reset is a full reset if --extra is not specified!
             if (_reset)
             {
-                IConfig baseConfig = new RegistryConfig(-1);
-                baseConfig.DeleteAllParameters();
-                Utils.DeleteScheduledTasks();
+                if (_extra == -1)
+                {
+                    IConfig baseConfig = new RegistryConfig(-1);
+                    baseConfig.DeleteAllParameters();
+                    Utils.DeleteScheduledTasks();
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(_winCertesOptions.DomainsFriendlyName))
+                        Utils.DeleteScheduledTasks(_winCertesOptions.DomainsFriendlyName);
+                    _config.DeleteAllParameters(_extra);
+                }
                 return 0;
             }
 
@@ -458,7 +433,7 @@ namespace WinCertes
             if (_winCertesOptions.Revoke > -1) { RevokeCert(_domains, _winCertesOptions.Revoke); return 0; }
             // default mode: enrollment/renewal. check if there's something to be done
             // note that in any case, we want to be able to set the scheduled task (won't do anything if taskName is null)
-            if (!IsThereCertificateAndIsItToBeRenewed(_domains)) { Utils.CreateScheduledTask(taskName, _domains, _extra); return 0; }
+            if (!_winCertesOptions.IsThereCertificateAndIsItToBeRenewed(_domains, _config)) { Utils.CreateScheduledTask(taskName, _domains, _extra); return 0; }
 
             // Now the real stuff: we register the order for the domains, and have them validated by the ACME service
             IHTTPChallengeValidator httpChallengeValidator = HTTPChallengeValidatorFactory.GetHTTPChallengeValidator(_winCertesOptions.Standalone, _winCertesOptions.HttpPort, _winCertesOptions.WebRoot);
@@ -470,13 +445,13 @@ namespace WinCertes
             // We get the certificate from the ACME service
             var pfx = Task.Run(() => _certesWrapper.RetrieveCertificate(_domains, _certTmpPath, Utils.DomainsToFriendlyName(_domains))).GetAwaiter().GetResult();
             if (pfx == null) return ERROR;
-            CertificateStorageManager certificateStorageManager = new CertificateStorageManager(pfx, ((_winCertesOptions.Csp == null) && (!_winCertesOptions.noCsp)));
+            CertificateStorageManager certificateStorageManager = new CertificateStorageManager(pfx, ((_winCertesOptions.Csp == null) && (!_winCertesOptions.NoCsp)));
             // Let's process the PFX into Windows Certificate objet.
             certificateStorageManager.ProcessPFX();
             // and we write its information to the WinCertes configuration
-            RegisterCertificateIntoConfiguration(certificateStorageManager.Certificate, _domains);
+            WinCertesOptions.RegisterCertificateIntoConfiguration(certificateStorageManager.Certificate, _domains, _config);
             // Import the certificate into the Windows store
-            if (!_winCertesOptions.noCsp) certificateStorageManager.ImportCertificateIntoCSP(_winCertesOptions.Csp);
+            if (!_winCertesOptions.NoCsp) certificateStorageManager.ImportCertificateIntoCSP(_winCertesOptions.Csp);
 
             // Bind certificate to IIS Site (won't do anything if option is null)
             if (Utils.BindCertificateForIISSite(certificateStorageManager.Certificate, _winCertesOptions.BindName, _winCertesOptions.BindPort, _winCertesOptions.Sni))
@@ -484,12 +459,12 @@ namespace WinCertes
             else
                 _logger.Debug("Certificate not bound to any IIS site");
             // Execute PowerShell Script (won't do anything if option is null)
-            Utils.ExecutePowerShell(_winCertesOptions.ScriptFile, pfx, _winCertesOptions.ScriptExecutionPolicy);
+            Utils.ExecutePowerShell(_winCertesOptions.PsScript ? _winCertesOptions.ScriptFile : null, pfx, _winCertesOptions.PsExecPolicy ? _winCertesOptions.ScriptExecutionPolicy : null);
             // Create the AT task that will execute WinCertes periodically (won't do anything if taskName is null)
             Utils.CreateScheduledTask(taskName, _domains, _extra);
 
             // Let's delete the PFX file
-            RemoveFileAndLog(pfx);
+            Utils.RemoveFileAndLog(pfx);
 
             return 0;
         }

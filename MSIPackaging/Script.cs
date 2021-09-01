@@ -11,7 +11,7 @@ namespace MSIPackaging
     {
         static public void Main(string[] args)
         {
-            var version = "1.5.7";
+            var version = "1.5.8";
 
 #if DEBUG
             if (System.IO.File.Exists("WinCertes-Debug." + version + "-pre.msi")) System.IO.File.Delete("WinCertes-Debug." + version + "-pre.msi");

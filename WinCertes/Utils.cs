@@ -13,11 +13,13 @@ using System.IO;
 using System.Linq;
 using System.Management.Automation.Runspaces;
 using System.Reflection;
+using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using TS = Microsoft.Win32.TaskScheduler;
 
 
@@ -67,7 +69,7 @@ namespace WinCertes
     /// </summary>
     public static class Utils
     {
-        private static readonly ILogger logger = LogManager.GetLogger("WinCertes.Utils");
+        private static readonly ILogger _logger = LogManager.GetLogger("WinCertes.Utils");
 
         /// <summary>
         /// Executes powershell script scriptFile
@@ -78,7 +80,7 @@ namespace WinCertes
         /// <returns></returns>
         public static bool ExecutePowerShell(string scriptFile, AuthenticatedPFX pfx, string executionPolicy)
         {
-            if (scriptFile == null) return false;
+            if (string.IsNullOrEmpty(scriptFile)) return false;
             try
             {
                 // First let's create the execution runspace
@@ -121,12 +123,12 @@ namespace WinCertes
 
                 // and we invoke it
                 var results = pipeline.Invoke();
-                logger.Info($"Executed script {scriptFile}.");
+                _logger.Info($"Executed script {scriptFile}.");
                 return true;
             }
             catch (Exception e)
             {
-                logger.Error($"Could not execute {scriptFile}: {e.Message}");
+                _logger.Error($"Could not execute {scriptFile}: {e.Message}");
                 return false;
             }
         }
@@ -151,6 +153,55 @@ namespace WinCertes
         }
 
         /// <summary>
+        /// Removes specified files and logs it
+        /// </summary>
+        /// <param name="path"></param>
+        public static void RemoveFileAndLog(AuthenticatedPFX pfx)
+        {
+            File.Delete(pfx.PfxFullPath);
+            File.Delete(pfx.PemCertPath);
+            File.Delete(pfx.PemKeyPath);
+            _logger.Info($"Removed files from filesystem: {pfx.PfxFullPath}, {pfx.PemCertPath}, {pfx.PemKeyPath}");
+        }
+
+        /// <summary>
+        /// Initializes WinCertes Directory path on the filesystem
+        /// </summary>
+        /// <returns>(WinCertes Path, Cert Temp Path)</returns>
+        public static (string, string) InitWinCertesDirectoryPath()
+        {
+            var _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "WinCertes");
+            if (!System.IO.Directory.Exists(_path))
+            {
+                System.IO.Directory.CreateDirectory(_path);
+            }
+            var _temp = Path.Combine(_path, "CertsTmp");
+            if (!System.IO.Directory.Exists(_temp))
+            {
+                System.IO.Directory.CreateDirectory(_temp);
+            }
+            // We fix the permissions for the certs temporary directory
+            // so that no user can have access to it
+            DirectoryInfo winCertesTmpDi = new DirectoryInfo(_temp);
+            DirectoryInfo programDataDi = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
+            if (OperatingSystem.IsWindows())
+            {
+                DirectorySecurity programDataDs = programDataDi.GetAccessControl(AccessControlSections.All);
+                DirectorySecurity winCertesTmpDs = winCertesTmpDi.GetAccessControl(AccessControlSections.All);
+                winCertesTmpDs.SetAccessRuleProtection(true, false);
+                foreach (FileSystemAccessRule accessRule in programDataDs.GetAccessRules(true, true, typeof(NTAccount)))
+                {
+                    if (accessRule.IdentityReference.Value.IndexOf("Users", StringComparison.InvariantCultureIgnoreCase) < 0)
+                    {
+                        winCertesTmpDs.AddAccessRule(accessRule);
+                    }
+                }
+                winCertesTmpDi.SetAccessControl(winCertesTmpDs);
+            }
+            return (_path, _temp);
+        }
+
+        /// <summary>
         /// Binds the specified certificate located in "MY" store to the specified IIS site on the local machine
         /// </summary>
         /// <param name="certificate"></param>
@@ -165,7 +216,7 @@ namespace WinCertes
                 Site site = serverMgr.Sites[siteName];
                 if (site == null)
                 {
-                    logger.Error($"Could not find IIS site {siteName}");
+                    _logger.Error($"Could not find IIS site {siteName}");
                     return false;
                 }
                 // Use whether they want SNI on, rather than it not being on Port 0 = 443
@@ -181,7 +232,7 @@ namespace WinCertes
                                 binding.CertificateHash = certificate.GetCertHash();
                                 binding.CertificateStoreName = "MY";
                                 foundBinding = true;
-                                logger.Debug("Found binding by port for site: " + siteName + " Will update it with cert with serial: " + certificate.SerialNumber);
+                                _logger.Debug("Found binding by port for site: " + siteName + " Will update it with cert with serial: " + certificate.SerialNumber);
                             }
                         }
                     }
@@ -192,7 +243,7 @@ namespace WinCertes
                         // This is technically not necessary, but seems it doesn't always put the Hash on the binding without this extra confirmation!
                         binding.CertificateHash = certificate.GetCertHash();
                         binding.CertificateStoreName = "MY";
-                        logger.Debug("Could not find binding, will try to create one on port " + port);
+                        _logger.Debug("Could not find binding, will try to create one on port " + port);
                     }
                 }
                 else
@@ -209,7 +260,7 @@ namespace WinCertes
                                     binding.CertificateHash = certificate.GetCertHash();
                                     binding.CertificateStoreName = "MY";
                                     foundBinding = true;
-                                    logger.Debug("Found binding by hostname for site: " + siteName + " Will update it with cert with serial: " + certificate.SerialNumber);
+                                    _logger.Debug("Found binding by hostname for site: " + siteName + " Will update it with cert with serial: " + certificate.SerialNumber);
                                 }
                             }
                         }
@@ -222,7 +273,7 @@ namespace WinCertes
                             binding.CertificateHash = certificate.GetCertHash();
                             binding.SslFlags = SslFlags.Sni;
                             binding.CertificateStoreName = "MY";
-                            logger.Debug("Could not find binding, will try to create one on port 443");
+                            _logger.Debug("Could not find binding, will try to create one on port 443");
                         }
                     }
                 }
@@ -235,7 +286,7 @@ namespace WinCertes
             }
             catch (Exception e)
             {
-                logger.Error(e, $"Could not bind certificate to site {siteName}: {e.Message}");
+                _logger.Error(e, $"Could not bind certificate to site {siteName}: {e.Message}");
                 return false;
             }
         }
@@ -343,11 +394,11 @@ namespace WinCertes
                     // Register the task in the root folder
                     ts.RootFolder.RegisterTaskDefinition($"WinCertes - {taskName}", td);
                 }
-                logger.Info($"Scheduled Task \"WinCertes - {taskName}\" created successfully");
+                _logger.Info($"Scheduled Task \"WinCertes - {taskName}\" created successfully");
             }
             catch (Exception e)
             {
-                logger.Error("Unable to create Scheduled Task" + e.Message);
+                _logger.Error("Unable to create Scheduled Task" + e.Message);
             }
         }
 
@@ -380,7 +431,7 @@ namespace WinCertes
             }
             catch (Exception e)
             {
-                logger.Error("Unable to read Scheduled Task status" + e.Message);
+                _logger.Error("Unable to read Scheduled Task status" + e.Message);
                 return false;
             }
         }
@@ -415,7 +466,7 @@ namespace WinCertes
             }
             catch (Exception e)
             {
-                logger.Error("Unable to read Scheduled Task status" + e.Message);
+                _logger.Error("Unable to read Scheduled Task status" + e.Message);
             }
         }
 
@@ -519,7 +570,7 @@ namespace WinCertes
             }
             catch (Exception e)
             {
-                logger.Error($"Could not retrieve certificate from store: {e.Message}");
+                _logger.Error($"Could not retrieve certificate from store: {e.Message}");
                 return null;
             }
         }
@@ -547,7 +598,7 @@ namespace WinCertes
             }
             catch (Exception e)
             {
-                logger.Error($"Could not generate new key pair: {e.Message}");
+                _logger.Error($"Could not generate new key pair: {e.Message}");
                 return null;
             }
         }

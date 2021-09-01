@@ -4,9 +4,9 @@
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net5.0-windows</TargetFramework>
 		<UseWindowsForms>true</UseWindowsForms>
-		<Version>1.5.7</Version>
-		<AssemblyVersion>1.5.7.0</AssemblyVersion>
-		<FileVersion>1.5.7.0</FileVersion>
+		<Version>1.5.8</Version>
+		<AssemblyVersion>1.5.8.0</AssemblyVersion>
+		<FileVersion>1.5.8.0</FileVersion>
 		<StartupObject>WinCertes.Program</StartupObject>
 		<RootNamespace>WinCertes</RootNamespace>
 		<AssemblyName>WinCertes</AssemblyName>
@@ -16,8 +16,16 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AWSSDK.Core" Version="3.7.2.7" />
-		<PackageReference Include="AWSSDK.Route53" Version="3.7.1.12" />
+	  <Compile Remove="Config\NetConfig.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="appsettings.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AWSSDK.Core" Version="3.7.2.9" />
+		<PackageReference Include="AWSSDK.Route53" Version="3.7.1.14" />
 		<PackageReference Include="Certes" Version="3.0.0" />
 		<PackageReference Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.1.4" />
 		<PackageReference Include="Microsoft.PowerShell.Commands.Management" Version="7.1.4" />

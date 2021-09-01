@@ -1,5 +1,6 @@
 ﻿using Certes.Acme;
 using Microsoft.Web.Administration;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +14,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -23,6 +25,8 @@ namespace WinCertes
 {
     public partial class WinCertesForm : Form
     {
+        private static readonly ILogger _logger = LogManager.GetLogger("WinCertes.WinCertesForm");
+
         SiteCollection Sites;
         Site IisSite;
         IConfig _config;
@@ -36,50 +40,16 @@ namespace WinCertes
 
         public WinCertesForm()
         {
-            (_winCertesPath, _certTmpPath) = InitWinCertesDirectoryPath();
+            (_winCertesPath, _certTmpPath) = Utils.InitWinCertesDirectoryPath();
+            Utils.ConfigureLogger(_winCertesPath);
             InitializeComponent();
         }
 
-        /// <summary>
-        /// Initializes WinCertes Directory path on the filesystem
-        /// </summary>
-        /// <returns>(WinCertes Path, Cert Temp Path)</returns>
-        private static (string, string) InitWinCertesDirectoryPath()
-        {
-            var _path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "WinCertes");
-            if (!System.IO.Directory.Exists(_path))
-            {
-                System.IO.Directory.CreateDirectory(_path);
-            }
-            var _temp = Path.Combine(_path, "CertsTmp");
-            if (!System.IO.Directory.Exists(_temp))
-            {
-                System.IO.Directory.CreateDirectory(_temp);
-            }
-            // We fix the permissions for the certs temporary directory
-            // so that no user can have access to it
-            DirectoryInfo winCertesTmpDi = new DirectoryInfo(_temp);
-            DirectoryInfo programDataDi = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
-            if (OperatingSystem.IsWindows())
-            {
-                DirectorySecurity programDataDs = programDataDi.GetAccessControl(AccessControlSections.All);
-                DirectorySecurity winCertesTmpDs = winCertesTmpDi.GetAccessControl(AccessControlSections.All);
-                winCertesTmpDs.SetAccessRuleProtection(true, false);
-                foreach (FileSystemAccessRule accessRule in programDataDs.GetAccessRules(true, true, typeof(NTAccount)))
-                {
-                    if (accessRule.IdentityReference.Value.IndexOf("Users", StringComparison.InvariantCultureIgnoreCase) < 0)
-                    {
-                        winCertesTmpDs.AddAccessRule(accessRule);
-                    }
-                }
-                winCertesTmpDi.SetAccessControl(winCertesTmpDs);
-            }
-            return (_path, _temp);
-        }
 
         /// <summary>
         /// Initializes the CertesWrapper, and registers the account if necessary
         /// </summary>
+        /// <param name="config">the Configuration</param>
         /// <param name="serviceUri">the ACME service URI</param>
         /// <param name="email">the email account used to register</param>
         private async Task<bool> InitCertesWrapperAsync(IConfig config, string serviceUri, string email)
@@ -90,6 +60,8 @@ namespace WinCertes
             // If local computer's account isn't registered on the ACME service, we'll do it.
             if (!_certesWrapper.IsAccountRegistered())
             {
+                actionToolStripProgressBar.Value = 10;
+                actionToolStripStatusLabel.Text = "Registering New Account...";
                 var regRes = await _certesWrapper.RegisterNewAccount();
                 if (!regRes)
                     return false;
@@ -98,33 +70,26 @@ namespace WinCertes
 
         }
 
-        /// <summary>
-        /// Revoke certificate issued for specified list of domains
-        /// </summary>
-        /// <param name="domains"></param>
         private async Task<bool?> RevokeCert(int revoke = 0)
         {
+            actionToolStripProgressBar.Value = 25;
+            actionToolStripStatusLabel.Text = "Getting Existing Certificate from Configuration...";
             string serial = _config.ReadStringParameter("certSerial" + _winCertesOptions.DomainsHostId);
             if (serial == null)
                 return null;
 
+            actionToolStripProgressBar.Value = 50;
+            actionToolStripStatusLabel.Text = "Revoking Certificate with ACME Service...";
             // Here we revoke from ACME Service. Note that any error is already handled into the wrapper
             if (await _certesWrapper.RevokeCertificate(_cert, revoke))
             {
-                _config.DeleteParameter("certExpDate" + _winCertesOptions.DomainsHostId);
-                _config.DeleteParameter("certSerial" + _winCertesOptions.DomainsHostId);
-                _config.DeleteParameter("domainsHostId");
-                X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
-                store.Open(OpenFlags.ReadWrite);
-                store.Remove(_cert);
-                store.Close();
+                actionToolStripProgressBar.Value = 75;
+                actionToolStripStatusLabel.Text = "Removing Certificate from Configuration...";
+                WinCertesOptions.RemoveCertificateFromConfiguration(_cert, _config, _winCertesOptions.DomainsHostId);
+
                 _cert = null;
                 certButton.Visible = false;
                 revokeButton.Visible = false;
-                string task = _config.ReadStringParameter("domainsFriendlyName");
-                if (task != null)
-                    Utils.DeleteScheduledTasks(task);
-                _config.DeleteParameter("domainsFriendlyName");
                 return true;
             }
 
@@ -134,7 +99,10 @@ namespace WinCertes
 
         private async Task<bool?> IssueCert(List<string> domains, string taskName = null)
         {
-            bool? result = null;
+            bool? result;
+
+            actionToolStripProgressBar.Value = 20;
+            actionToolStripStatusLabel.Text = "Getting HTTP Validator...";
 
             // Now the real stuff: we register the order for the domains, and have them validated by the ACME service
             IHTTPChallengeValidator httpChallengeValidator = HTTPChallengeValidatorFactory.GetHTTPChallengeValidator(_winCertesOptions.Standalone, _winCertesOptions.HttpPort, _winCertesOptions.WebRoot);
@@ -142,57 +110,79 @@ namespace WinCertes
             // Not supporting DNS yet!
             // IDNSChallengeValidator dnsChallengeValidator = DNSChallengeValidatorFactory.GetDNSChallengeValidator(_config);
             IDNSChallengeValidator dnsChallengeValidator = null;
+            // This should never show!
             if ((httpChallengeValidator == null) && (dnsChallengeValidator == null)) { MessageBox.Show("Specify either an HTTP or a DNS validation method.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation); return false; }
-            if (!await _certesWrapper.RegisterNewOrderAndVerify(domains, httpChallengeValidator, dnsChallengeValidator)) { if (httpChallengeValidator != null) httpChallengeValidator.EndAllChallengeValidations(); return false; }
-            if (httpChallengeValidator != null) httpChallengeValidator.EndAllChallengeValidations();
+
+            actionToolStripProgressBar.Value = 30;
+            actionToolStripStatusLabel.Text = "Registering New Order and Verifiying...";
+            if (!await _certesWrapper.RegisterNewOrderAndVerify(domains, httpChallengeValidator, dnsChallengeValidator))
+            {
+                actionToolStripProgressBar.Value = 40;
+                actionToolStripStatusLabel.Text = "Failed to Verify, cleaning up...";
+                if (httpChallengeValidator != null) httpChallengeValidator.EndAllChallengeValidations(); return false;
+            }
+
+            actionToolStripProgressBar.Value = 40;
+            actionToolStripStatusLabel.Text = "Verified, cleaning up...";
+
+            if (httpChallengeValidator != null)
+            {
+                httpChallengeValidator.EndAllChallengeValidations();
+            }
+
+            actionToolStripProgressBar.Value = 50;
+            actionToolStripStatusLabel.Text = "Retrieving Certificate...";
 
             // We get the certificate from the ACME service
             var pfx = await _certesWrapper.RetrieveCertificate(domains, _certTmpPath, Utils.DomainsToFriendlyName(domains));
             if (pfx == null) return null;
 
+            actionToolStripProgressBar.Value = 60;
+            actionToolStripStatusLabel.Text = "Storing Certificate...";
 
             // Currently only supporting the default Csp
             CertificateStorageManager certificateStorageManager = new CertificateStorageManager(pfx, true);
             // Let's process the PFX into Windows Certificate objet.
             certificateStorageManager.ProcessPFX();
             // and we write its information to the WinCertes configuration
-            RegisterCertificateIntoConfiguration(certificateStorageManager.Certificate, domains);
+            WinCertesOptions.RegisterCertificateIntoConfiguration(certificateStorageManager.Certificate, domains, _config);
             // Import the certificate into the Windows store
-            if (!_winCertesOptions.noCsp) certificateStorageManager.ImportCertificateIntoCSP(_winCertesOptions.Csp);
+            if (!_winCertesOptions.NoCsp) certificateStorageManager.ImportCertificateIntoCSP(_winCertesOptions.Csp);
+
+            actionToolStripProgressBar.Value = 70;
+            actionToolStripStatusLabel.Text = "Binding Certificate to IIS if required...";
 
             // Bind certificate to IIS Site (won't do anything if option is null)
             if (Utils.BindCertificateForIISSite(certificateStorageManager.Certificate, _winCertesOptions.BindName, _winCertesOptions.BindPort, _winCertesOptions.Sni))
+            {
                 result = true;
+                _logger.Info("Successfully bound certificate for IIS site: " + _winCertesOptions.BindName);
+            }
             else
+            {
                 result = string.IsNullOrEmpty(_winCertesOptions.BindName);
+                _logger.Debug("Certificate not bound to any IIS site");
+            }
+
+            actionToolStripProgressBar.Value = 80;
+            actionToolStripStatusLabel.Text = "Executing PowerShell Script if required...";
 
             // Execute PowerShell Script (won't do anything if option is null)
             Utils.ExecutePowerShell(_winCertesOptions.ScriptFile, pfx, _winCertesOptions.ScriptExecutionPolicy);
+
+            actionToolStripProgressBar.Value = 90;
+            actionToolStripStatusLabel.Text = "Creating Scheduled Task if required...";
+
             // Create the AT task that will execute WinCertes periodically (won't do anything if taskName is null)
             Utils.CreateScheduledTask(taskName, domains, _extra);
 
+            actionToolStripProgressBar.Value = 95;
+            actionToolStripStatusLabel.Text = "Removing temporary certificate...";
+
             // Let's delete the PFX file
-            File.Delete(pfx.PfxFullPath);
-            File.Delete(pfx.PemCertPath);
-            File.Delete(pfx.PemKeyPath);
+            Utils.RemoveFileAndLog(pfx);
 
             return result;
-        }
-
-        /// <summary>
-        /// Registers certificate into configuration
-        /// </summary>
-        /// <param name="pfx"></param>
-        /// <param name="domains"></param>
-        private void RegisterCertificateIntoConfiguration(X509Certificate2 certificate, List<string> domains)
-        {
-            // and we write its expiration date to the WinCertes configuration, into "InvariantCulture" date format
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            var domainsHostId = Utils.DomainsToHostId(domains);
-            _config.WriteStringParameter("domainsHostId", domainsHostId);
-            _config.WriteStringParameter("domainsFriendlyName", Utils.DomainsToFriendlyName(domains));
-            _config.WriteStringParameter("certExpDate" + domainsHostId, certificate.GetExpirationDateString());
-            _config.WriteStringParameter("certSerial" + domainsHostId, certificate.GetSerialNumberString());
         }
 
         private bool AddDomain(string domain)
@@ -220,6 +210,7 @@ namespace WinCertes
             _config = new RegistryConfig(_extra);
             _winCertesOptions.MiscOpts = new Dictionary<string, string>();
             _winCertesOptions.WriteOptionsIntoConfiguration(_config);
+            _certesWrapper = null;
             _cert = null;
             configsComboBox.Items.Clear();
             domainsListBox.Items.Clear();
@@ -277,7 +268,7 @@ namespace WinCertes
                 psExecComboBox.SelectedItem = "Undefined";
             }
 
-            psExecCheckBox.Checked = _winCertesOptions.PsExec && psExecComboBox.Text != "Undefined";
+            psExecCheckBox.Checked = _winCertesOptions.PsExecPolicy && psExecComboBox.Text != "Undefined";
 
             sniCheckBox.Checked = _winCertesOptions.Sni;
             taskCheckBox.Checked = !string.IsNullOrEmpty(_winCertesOptions.DomainsFriendlyName) && Utils.IsScheduledTaskCreated(_winCertesOptions.DomainsFriendlyName);
@@ -294,17 +285,14 @@ namespace WinCertes
                     certButton.Visible = true;
                     settingsGroupBox.Enabled = false;
                     domainsGroupBox.Enabled = false;
-                    Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-                    DateTime expirationDate = DateTime.Parse(_cert.GetExpirationDateString());
-                    DateTime futureThresold = DateTime.Now.AddDays(_winCertesOptions.RenewalDelay == 0 ? 30 : _winCertesOptions.RenewalDelay);
-                    if (futureThresold > expirationDate)
+                    if (_winCertesOptions.IsCertificateToBeRenewed(_cert))
                     {
                         issueButton.Text = "Renew Certificate";
-                        issueButton.Visible = true;
+                        issueButton.Enabled = true;
                     }
                     else
                     {
-                        issueButton.Visible = false;
+                        issueButton.Enabled = false;
                     }
 
                     var sans = Utils.ParseSubjectAlternativeName(_cert);
@@ -320,7 +308,7 @@ namespace WinCertes
                 domainsGroupBox.Enabled = true;
                 revokeButton.Visible = false;
                 certButton.Visible = false;
-                issueButton.Visible = false;
+                issueButton.Enabled = false;
                 issueButton.Text = "Issue Certificate";
             }
 
@@ -335,11 +323,11 @@ namespace WinCertes
                 if (_cert != null)
                 {
                     issueButton.Text = "Update Settings";
-                    issueButton.Visible = !_iisBound;
+                    issueButton.Enabled = !_iisBound;
                 }
             }
 
-            var extras = _config.getExtrasConfigParams();
+            var extras = _config.GetExtrasConfigParams();
 
             if (extras.Count > 0)
             {
@@ -354,6 +342,7 @@ namespace WinCertes
                 }
             }
 
+            CheckIssue();
         }
 
         private void PopulateServers()
@@ -403,36 +392,82 @@ namespace WinCertes
 
         private bool CheckIssue()
         {
-            if (domainsListBox.Items.Count > 0
-                && !string.IsNullOrEmpty(serviceComboBox.Text)
-                && emailTextBox.Text.Contains("@")
-                && issueButton.Text == "Issue Certificate")
+            if (issueButton.Text == "Issue Certificate" || issueButton.Text == "Renew Certificate")
             {
-                if (standaloneRadioButton.Checked && CheckPort())
-                    issueButton.Visible = true;
-                else if (iisRadioButton.Checked && sitesListBox.SelectedIndex > -1 && !string.IsNullOrEmpty(webRootLabel.Text))
-                    issueButton.Visible = true;
-                else
-                    issueButton.Visible = false;
+
+                if (string.IsNullOrEmpty(emailTextBox.Text.Trim()) || !Regex.IsMatch(emailTextBox.Text.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250)))
+                {
+                    actionToolStripStatusLabel.Text = "Valid E-mail is Required.";
+                    issueButton.Enabled = false;
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(serviceComboBox.Text.Trim()) || !Regex.IsMatch(serviceComboBox.Text.Trim(), @"^https:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$", RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250)))
+                {
+                    actionToolStripStatusLabel.Text = "Valid Service address is Required.";
+                    issueButton.Enabled = false;
+                    return false;
+                }
+
+                if (standaloneRadioButton.Checked)
+                {
+                    if (!CheckPort())
+                    {
+                        actionToolStripStatusLabel.Text = "Standalone HTTP Server requires a Port that is Not in Use.";
+                        issueButton.Enabled = false;
+                        return false;
+                    }
+                    else if (iisCheckBox.Checked && sitesListBox.SelectedIndex == -1)
+                    {
+                        actionToolStripStatusLabel.Text = "IIS Site is required to Bind Certificate to.";
+                        issueButton.Enabled = false;
+                        return false;
+
+                    }
+                }
+
+                if (iisRadioButton.Checked && (sitesListBox.SelectedIndex == -1 || string.IsNullOrEmpty(webRootLabel.Text)))
+                {
+                    actionToolStripStatusLabel.Text = "IIS Site is required for Challenge Response.";
+                    issueButton.Enabled = false;
+                    return false;
+                }
+
+                if (domainsListBox.Items.Count == 0)
+                {
+                    actionToolStripStatusLabel.Text = "Domains to generate certificate for are required.";
+                    issueButton.Enabled = false;
+                    return false;
+
+                }
+
+                actionToolStripStatusLabel.Text = issueButton.Text == "Renew Certificate" ? "Ready to Renew Certificate." : "Ready to Issue Certificate.";
+                issueButton.Enabled = true;
+                return true;
+
             }
             else if (issueButton.Text == "Update Settings")
-                issueButton.Visible = ((iisCheckBox.Checked != _winCertesOptions.BindSite)
+            {
+                issueButton.Enabled = ((iisCheckBox.Checked != _winCertesOptions.BindSite)
                                             || (sniCheckBox.Checked != _winCertesOptions.Sni)
                                             || (iisPortNumericUpDown.Value != (_winCertesOptions.BindPort == 0 ? 443 : _winCertesOptions.BindPort))
                                             || (psScriptCheckBox.Checked != _winCertesOptions.PsScript)
                                             || (psScriptTextBox.Text != (_winCertesOptions.ScriptFile ?? ""))
-                                            || (psExecCheckBox.Checked != _winCertesOptions.PsExec)
+                                            || (psExecCheckBox.Checked != _winCertesOptions.PsExecPolicy)
                                             || (psExecComboBox.Text != (_winCertesOptions.ScriptExecutionPolicy ?? "Undefined"))
                                             || (taskCheckBox.Checked != _winCertesOptions.TaskScheduled)
                                             || (renewalNumericUpDown.Value != _winCertesOptions.RenewalDelay)
                                             || (sitesListBox.SelectedItem != null && sitesListBox.Text != _winCertesOptions.BindName)
                                             || (standaloneRadioButton.Checked && httpPortNumericUpDown.Value != (_winCertesOptions.HttpPort == 0 ? 80 : _winCertesOptions.HttpPort)));
-            else if (issueButton.Text != "Renew Certificate")
-                issueButton.Visible = false;
-            else
-                issueButton.Visible = false;
 
-            return issueButton.Visible;
+                if (issueButton.Enabled)
+                    actionToolStripStatusLabel.Text = "Ready to Update Settings.";
+                else
+                    actionToolStripStatusLabel.Text = "WinCertes";
+
+            }
+
+            return issueButton.Enabled;
         }
 
         private void domainsListBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -496,9 +531,15 @@ namespace WinCertes
                             bindingsListBox.Items.Add($"{bind.Protocol}://{(string.IsNullOrEmpty(bind.Host) ? "*" : bind.Host)}:{bind.EndPoint.Port}{virtualRoot.Path} {(bind.SslFlags == SslFlags.Sni ? "(SNI)" : "")}");
                         }
                     }
-                    catch (ArgumentException)
+                    catch (ArgumentException err)
                     {
+                        _logger.Error($"Cound not read IIS binding, try resetting IIS, continuing: {err.Message}");
                         continue;
+                    }
+                    catch (Exception err)
+                    {
+                        _logger.Error($"Cound not read IIS binding, try resetting IIS, breaking: {err.Message}");
+
                     }
 
 
@@ -510,10 +551,10 @@ namespace WinCertes
 
         private void browseButton_Click(object sender, EventArgs e)
         {
-            openFileDialog1.Filter = "PowerShell Scripts (*.ps1)|*.ps1|All files (*.*)|*.*";
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            browseOpenFileDialog.Filter = "PowerShell Scripts (*.ps1)|*.ps1|All files (*.*)|*.*";
+            if (browseOpenFileDialog.ShowDialog() == DialogResult.OK)
             {
-                psScriptTextBox.Text = openFileDialog1.FileName;
+                psScriptTextBox.Text = browseOpenFileDialog.FileName;
                 psScriptCheckBox.Checked = true;
             }
         }
@@ -529,6 +570,7 @@ namespace WinCertes
         private void iisRadioButton_CheckedChanged(object sender, EventArgs e)
         {
             standaloneGroupBox.Enabled = false;
+            CheckIssue();
         }
 
         private void standaloneRadioButton_CheckedChanged(object sender, EventArgs e)
@@ -537,7 +579,7 @@ namespace WinCertes
 
             checkPortButton.Visible = false;
             if (standaloneRadioButton.Checked)
-                CheckPort();
+                CheckIssue();
         }
 
         private bool CheckPort()
@@ -557,28 +599,61 @@ namespace WinCertes
         private void emailTextBox_TextChanged(object sender, EventArgs e)
         {
             registeredLabel.Visible = (_winCertesOptions.Email == emailTextBox.Text.Trim() && _winCertesOptions.Registered);
+            CheckIssue();
         }
 
         private async void revokeButton_ClickAsync(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure you wish to Revoke and delete the Certificate?", "Are you sure?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
+                this.Enabled = false;
+                actionToolStripProgressBar.Value = 0;
+                actionToolStripProgressBar.Visible = true;
+                actionToolStripStatusLabel.Text = "Initializing Certes...";
+
                 if (await InitCertesWrapperAsync(_config, _winCertesOptions.ServiceUri, _winCertesOptions.Email) && _certesWrapper != null)
                 {
                     var result = await RevokeCert();
                     if (result.HasValue && result.Value)
                     {
+                        actionToolStripProgressBar.Value = 100;
+                        actionToolStripStatusLabel.Text = "Certificate successfully revoked.";
                         MessageBox.Show($"Certificate has been successfully revoked", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         BindConfig();
                     }
-                    else if (!result.HasValue)
-                        MessageBox.Show("Could not find configuration or configuration does not match Certificate domains.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     else
-                        MessageBox.Show("Error revoking certificate.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    {
+                        string message;
+
+                        if (!result.HasValue)
+                            message = "Could not find configuration or configuration does not match Certificate domains.\n\n";
+                        else
+                            message = "Error revoking certificate, it could already be revoked.\n\n";
+
+                        if (MessageBox.Show(message + "Would you like to Delete the certificate and reset configuration?", "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
+                        {
+                            actionToolStripProgressBar.Value = 75;
+                            actionToolStripStatusLabel.Text = "Removing Certificate from Configuration...";
+                            WinCertesOptions.RemoveCertificateFromConfiguration(_cert, _config, _winCertesOptions.DomainsHostId);
+                            actionToolStripProgressBar.Value = 100;
+                            actionToolStripStatusLabel.Text = "Certificate successfully deleted.";
+                            MessageBox.Show($"Certificate has been successfully deleted", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            _cert = null;
+                            certButton.Visible = false;
+                            revokeButton.Visible = false;
+                            BindConfig();
+                        }
+
+                    }
                 }
                 else
                     MessageBox.Show($"Could not register ACME service account with service address: {_winCertesOptions.ServiceUri ?? WellKnownServers.LetsEncryptV2.ToString()} e-mail address {_winCertesOptions.Email ?? "<None>"}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                this.Enabled = true;
+                actionToolStripProgressBar.Visible = false;
+
             }
+
         }
 
         private void configsComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -677,7 +752,7 @@ namespace WinCertes
                     if (iisPortNumericUpDown.Value != (_winCertesOptions.BindPort == 0 ? 443 : _winCertesOptions.BindPort)) message += $"IIS Binding Port will be updated to {iisPortNumericUpDown.Value}.\r\n";
                     if (psScriptCheckBox.Checked != _winCertesOptions.PsScript) message += $"PowerShell Script execution will be updated to {(psScriptCheckBox.Checked ? "On" : "Off")}.\r\n";
                     if (psScriptTextBox.Text.Trim() != (_winCertesOptions.ScriptFile ?? "")) message += $"PowerShell Script will be updated to {Path.GetFileName(psScriptTextBox.Text)}.\r\n";
-                    if (psExecCheckBox.Checked != _winCertesOptions.PsExec) message += $"Setting PowerShell Script Execution Policy will be updated to {(psExecCheckBox.Checked ? "On" : "Off")}.\r\n";
+                    if (psExecCheckBox.Checked != _winCertesOptions.PsExecPolicy) message += $"Setting PowerShell Script Execution Policy will be updated to {(psExecCheckBox.Checked ? "On" : "Off")}.\r\n";
                     if (psExecComboBox.Text != (_winCertesOptions.ScriptExecutionPolicy ?? "Undefined")) message += $"PowerShell Script Execution Policy will be updated to {psExecComboBox.Text}.\r\n";
                     if (renewalNumericUpDown.Value != _winCertesOptions.RenewalDelay) message += $"Days before Renewal Period will be updated to {renewalNumericUpDown.Value}.\r\n";
                     if (taskCheckBox.Checked != _winCertesOptions.TaskScheduled)
@@ -693,27 +768,44 @@ namespace WinCertes
 
                     if (MessageBox.Show(message, "Update IIS Settings", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     {
+                        this.Enabled = false;
+                        actionToolStripProgressBar.Value = 0;
+                        actionToolStripProgressBar.Visible = true;
+                        actionToolStripStatusLabel.Text = "Updating Settings...";
+
                         _winCertesOptions.BindPort = (int)iisPortNumericUpDown.Value;
                         _winCertesOptions.Sni = sniCheckBox.Checked;
                         _winCertesOptions.BindName = sitesListBox.SelectedItem != null ? sitesListBox.Text : null;
                         _winCertesOptions.BindSite = iisCheckBox.Checked;
                         _winCertesOptions.BindPort = (int)iisPortNumericUpDown.Value;
                         _winCertesOptions.PsScript = psScriptCheckBox.Checked;
-                        _winCertesOptions.PsExec = psExecCheckBox.Checked;
+                        _winCertesOptions.PsExecPolicy = psExecCheckBox.Checked;
                         _winCertesOptions.ScriptExecutionPolicy = psExecComboBox.Text;
                         _winCertesOptions.ScriptFile = psScriptTextBox.Text.Trim();
                         _winCertesOptions.WebRoot = webRootLabel.Text;
                         _winCertesOptions.RenewalDelay = (int)renewalNumericUpDown.Value;
 
                         if (taskCheckBox.Checked)
+                        {
+                            actionToolStripProgressBar.Value = 33;
+                            actionToolStripStatusLabel.Text = "Creating Scheduled Task...";
                             Utils.CreateScheduledTask(taskName, domains, _extra);
+                        }
                         else if (taskName != null)
+                        {
+                            actionToolStripProgressBar.Value = 33;
+                            actionToolStripStatusLabel.Text = "Deleting Scheduled Task...";
                             Utils.DeleteScheduledTasks(taskName);
+                        }
 
+                        actionToolStripProgressBar.Value = 50;
+                        actionToolStripStatusLabel.Text = "Writing new Configuration...";
                         _winCertesOptions.WriteOptionsIntoConfiguration(_config, true);
 
                         if (iisCheckBox.Checked && !_iisBound)
                         {
+                            actionToolStripProgressBar.Value = 75;
+                            actionToolStripStatusLabel.Text = "Binding Certificate to IIS Site...";
                             if (Utils.BindCertificateForIISSite(_cert, _winCertesOptions.BindName, _winCertesOptions.BindPort, _winCertesOptions.Sni))
                             {
                                 MessageBox.Show($"Certificate successfully rebound to IIS Site.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -723,8 +815,12 @@ namespace WinCertes
                                 MessageBox.Show($"Certificate failed to bind to IIS Site.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
 
-
+                        actionToolStripProgressBar.Value = 100;
+                        actionToolStripStatusLabel.Text = "Settings Updated.";
                         BindConfig();
+
+                        this.Enabled = true;
+                        actionToolStripProgressBar.Visible = false;
                     }
                 }
                 else
@@ -757,7 +853,7 @@ namespace WinCertes
                     }
 
                     _winCertesOptions.PsScript = psScriptCheckBox.Checked;
-                    _winCertesOptions.PsExec = psExecCheckBox.Checked;
+                    _winCertesOptions.PsExecPolicy = psExecCheckBox.Checked;
                     _winCertesOptions.ScriptExecutionPolicy = psExecComboBox.Text;
                     _winCertesOptions.ScriptFile = psScriptTextBox.Text.Trim();
 
@@ -773,26 +869,55 @@ namespace WinCertes
                         taskName = Utils.DomainsToFriendlyName(domains);
                         text += $"A Scheduled Task will be created to insure the certificate is renewed within {_winCertesOptions.RenewalDelay} of expiry.";
                     }
+
                     if (MessageBox.Show(text, "Generate Certificate?", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     {
+                        this.Enabled = false;
+                        actionToolStripProgressBar.Value = 0;
+                        actionToolStripProgressBar.Visible = true;
+                        actionToolStripStatusLabel.Text = "Writing Settings into Configuration...";
+
                         _winCertesOptions.WriteOptionsIntoConfiguration(_config, true);
+
+                        actionToolStripProgressBar.Value = 5;
+                        actionToolStripStatusLabel.Text = "Initializing Certes...";
 
                         if (await InitCertesWrapperAsync(_config, _winCertesOptions.ServiceUri, _winCertesOptions.Email) && _certesWrapper != null)
                         {
+                            actionToolStripProgressBar.Value = 25;
+                            actionToolStripStatusLabel.Text = "Issuing Certificate...";
+
                             var result = await IssueCert(domains, taskName);
                             if (result.HasValue && result.Value)
                             {
+                                actionToolStripProgressBar.Value = 100;
+                                actionToolStripStatusLabel.Text = "Certificate issued.";
+
                                 MessageBox.Show($"Certificate has been successfully issued", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                                 PopulateSites();
                                 BindConfig();
                             }
-                            else if (!result.HasValue)
-                                MessageBox.Show("Unable to retreive the generated Certificate.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                             else
-                                MessageBox.Show("Error Binding to IIS Site, but certificate generated.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            {
+                                actionToolStripProgressBar.Value = 100;
+                                actionToolStripStatusLabel.Text = "Error issuing Certificate.";
+
+                                if (!result.HasValue)
+                                    MessageBox.Show("Unable to retreive the generated Certificate.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                                else
+                                    MessageBox.Show("Error Binding to IIS Site, but certificate generated.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                            }
+
                         }
                         else
+                        {
                             MessageBox.Show($"Could not register ACME service account with service address: {_winCertesOptions.ServiceUri ?? WellKnownServers.LetsEncryptV2.ToString()} e-mail address {_winCertesOptions.Email ?? "<None>"}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+
+                        this.Enabled = true;
+                        actionToolStripProgressBar.Visible = false;
+
                     }
                 }
             }
@@ -800,7 +925,7 @@ namespace WinCertes
 
         private void newConfigButton_Click(object sender, EventArgs e)
         {
-            var extras = _config.getExtrasConfigParams();
+            var extras = _config.GetExtrasConfigParams();
             var i = 1;
             foreach (var item in extras)
             {
@@ -860,6 +985,56 @@ namespace WinCertes
         {
             CheckIssue();
 
+        }
+
+        private void WinCertesForm_HelpButtonClicked(object sender, CancelEventArgs e)
+        {
+            DisplayHelp();
+        }
+
+        private void WinCertesForm_HelpRequested(object sender, HelpEventArgs hlpevent)
+        {
+            DisplayHelp();
+        }
+
+        private void serviceComboBox_TextUpdate(object sender, EventArgs e)
+        {
+            CheckIssue();
+        }
+
+        private void serviceComboBox_DropDownClosed(object sender, EventArgs e)
+        {
+            CheckIssue();
+        }
+
+        private static void DisplayHelp()
+        {
+            var message = @"WinCertes allows you to generate a free certificate using Lets Encrypt or a service of your choice.
+
+You must start by entering the e-mail address you will be registering the certificate with.
+
+If you are using IIS, simply select the Local IIS Server radio button, now select the IIS Site you will be using for the challenge response and if you wish to bind the certificate after, tick the Bind to IIS Site box. If you are hosting multiple domains, you may want to ensure Server Name Indication is ticked.
+
+If you are using the Standalong HTTP Server, select the Standalone HTTP Server radio button and ensure the Server Port is Free, you can still select an IIS site if you wish to bind the certificate to one after generating it.
+
+The Domains box should contain the list of domains to generate the certificate for, if the IIS Site already has bindings, the names will automatically be added, otherwise you must add all the Domains you wish to add to the certificate, remember, this must also include www.
+
+If you want to renew automatically select Schedule a Task to Renew Automatically, 30 days is the default renewal time, it can be less if you want.
+
+If you wish to run a PowerShell Script after generating the certificate, click Browse and select it from the File System, or enter it in the Execute PowerShell Script box, the Tickbox should tick automatically. If you need the Execution Policy to be higher, select one from the PowerShell Execution Policy Dropdown box.
+
+Now click Issue Certificate to generate the certificate.
+
+Once the certificate is generated, you can view the certificate by pressing Show Certificate.
+
+If you need to Revoke the certificate, press the Revoke Certificate button.
+
+You can change the settings at any time, ready for the next renewal, or it will bind the certificate to another IIS Site for you.
+
+Any issues, please report the Issue to the WinCertes GitHub repository.
+";
+
+            MessageBox.Show(message, "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

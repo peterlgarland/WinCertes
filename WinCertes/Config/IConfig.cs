@@ -95,7 +95,7 @@ namespace WinCertes.Config
         /// Is there a configuration parameter starting with given key?
         /// </summary>
         /// <param name="startsWith">the parameter to look for</param>
-        bool isThereConfigParam(string startsWith);
+        bool IsThereConfigParam(string startsWith);
 
         /// <summary>
         /// Deletes all WinCertes parameters from configuration, or a speicifc extra configuration
@@ -106,12 +106,12 @@ namespace WinCertes.Config
         /// Gets the number of Extras in the configuration
         /// </summary>
         /// <returns>int list of the Extra numbers</returns>
-        IList<int> getExtrasConfigParams();
+        IList<int> GetExtrasConfigParams();
 
         /// <summary>
         /// Gets the DomainsToHostId for Certificates in the Registry
         /// </summary>
         /// <returns>string list of the DomainsToHostIds</returns>
-        IList<string> getCertificateParams(string startsWith);
+        IList<string> GetCertificateParams(string startsWith);
     }
 }
