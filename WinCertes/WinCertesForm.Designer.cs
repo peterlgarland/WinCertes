@@ -112,23 +112,26 @@ namespace WinCertes
             this.iisGroupBox.Controls.Add(this.bindingsListBox);
             this.iisGroupBox.Controls.Add(this.label3);
             this.iisGroupBox.Controls.Add(this.label2);
-            this.iisGroupBox.Location = new System.Drawing.Point(12, 528);
+            this.iisGroupBox.Location = new System.Drawing.Point(6, 248);
+            this.iisGroupBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.iisGroupBox.Name = "iisGroupBox";
-            this.iisGroupBox.Size = new System.Drawing.Size(1326, 387);
+            this.iisGroupBox.Padding = new System.Windows.Forms.Padding(2, 1, 2, 1);
+            this.iisGroupBox.Size = new System.Drawing.Size(714, 181);
             this.iisGroupBox.TabIndex = 35;
             this.iisGroupBox.TabStop = false;
             this.iisGroupBox.Text = "IIS Settings";
             // 
             // iisPortNumericUpDown
             // 
-            this.iisPortNumericUpDown.Location = new System.Drawing.Point(739, 314);
+            this.iisPortNumericUpDown.Location = new System.Drawing.Point(398, 147);
+            this.iisPortNumericUpDown.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.iisPortNumericUpDown.Maximum = new decimal(new int[] {
             100000,
             0,
             0,
             0});
             this.iisPortNumericUpDown.Name = "iisPortNumericUpDown";
-            this.iisPortNumericUpDown.Size = new System.Drawing.Size(153, 39);
+            this.iisPortNumericUpDown.Size = new System.Drawing.Size(82, 23);
             this.iisPortNumericUpDown.TabIndex = 43;
             this.iisPortNumericUpDown.Value = new decimal(new int[] {
             443,
@@ -142,9 +145,10 @@ namespace WinCertes
             this.iisCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.iisCheckBox.AutoSize = true;
             this.iisCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.iisCheckBox.Location = new System.Drawing.Point(1086, 80);
+            this.iisCheckBox.Location = new System.Drawing.Point(591, 38);
+            this.iisCheckBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.iisCheckBox.Name = "iisCheckBox";
-            this.iisCheckBox.Size = new System.Drawing.Size(214, 36);
+            this.iisCheckBox.Size = new System.Drawing.Size(109, 19);
             this.iisCheckBox.TabIndex = 42;
             this.iisCheckBox.Text = "Bind to IIS Site";
             this.iisCheckBox.UseVisualStyleBackColor = true;
@@ -154,9 +158,10 @@ namespace WinCertes
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label7.Location = new System.Drawing.Point(506, 313);
+            this.label7.Location = new System.Drawing.Point(272, 147);
+            this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(227, 32);
+            this.label7.Size = new System.Drawing.Size(109, 15);
             this.label7.TabIndex = 40;
             this.label7.Text = "IIS Port to bind to:";
             // 
@@ -165,9 +170,10 @@ namespace WinCertes
             this.sniCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.sniCheckBox.AutoSize = true;
             this.sniCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.sniCheckBox.Location = new System.Drawing.Point(997, 315);
+            this.sniCheckBox.Location = new System.Drawing.Point(549, 148);
+            this.sniCheckBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.sniCheckBox.Name = "sniCheckBox";
-            this.sniCheckBox.Size = new System.Drawing.Size(316, 36);
+            this.sniCheckBox.Size = new System.Drawing.Size(158, 19);
             this.sniCheckBox.TabIndex = 39;
             this.sniCheckBox.Text = "Server Name Indication";
             this.sniCheckBox.UseVisualStyleBackColor = true;
@@ -175,42 +181,44 @@ namespace WinCertes
             // 
             // sitesListBox
             // 
-            this.sitesListBox.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.sitesListBox.FormattingEnabled = true;
-            this.sitesListBox.ItemHeight = 32;
-            this.sitesListBox.Location = new System.Drawing.Point(6, 80);
+            this.sitesListBox.ItemHeight = 15;
+            this.sitesListBox.Location = new System.Drawing.Point(3, 38);
+            this.sitesListBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.sitesListBox.Name = "sitesListBox";
-            this.sitesListBox.Size = new System.Drawing.Size(484, 292);
+            this.sitesListBox.Size = new System.Drawing.Size(262, 139);
             this.sitesListBox.TabIndex = 38;
             this.sitesListBox.SelectedIndexChanged += new System.EventHandler(this.sitesListBox_SelectedIndexChanged);
             // 
             // webRootLabel
             // 
-            this.webRootLabel.Location = new System.Drawing.Point(305, 35);
+            this.webRootLabel.Location = new System.Drawing.Point(164, 16);
+            this.webRootLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.webRootLabel.Name = "webRootLabel";
-            this.webRootLabel.Size = new System.Drawing.Size(970, 32);
+            this.webRootLabel.Size = new System.Drawing.Size(522, 15);
             this.webRootLabel.TabIndex = 37;
             // 
             // bindingsListBox
             // 
             this.bindingsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.bindingsListBox.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.bindingsListBox.FormattingEnabled = true;
-            this.bindingsListBox.ItemHeight = 32;
-            this.bindingsListBox.Location = new System.Drawing.Point(506, 134);
+            this.bindingsListBox.ItemHeight = 15;
+            this.bindingsListBox.Location = new System.Drawing.Point(272, 63);
+            this.bindingsListBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.bindingsListBox.Name = "bindingsListBox";
             this.bindingsListBox.SelectionMode = System.Windows.Forms.SelectionMode.None;
-            this.bindingsListBox.Size = new System.Drawing.Size(807, 164);
+            this.bindingsListBox.Size = new System.Drawing.Size(436, 79);
             this.bindingsListBox.TabIndex = 36;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label3.Location = new System.Drawing.Point(6, 35);
+            this.label3.Location = new System.Drawing.Point(3, 16);
+            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(293, 32);
+            this.label3.Size = new System.Drawing.Size(142, 15);
             this.label3.TabIndex = 35;
             this.label3.Text = "Web Root for Challange:";
             // 
@@ -218,9 +226,10 @@ namespace WinCertes
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(506, 99);
+            this.label2.Location = new System.Drawing.Point(272, 46);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(158, 32);
+            this.label2.Size = new System.Drawing.Size(78, 15);
             this.label2.TabIndex = 34;
             this.label2.Text = "Site Bindings:";
             // 
@@ -235,9 +244,11 @@ namespace WinCertes
             this.domainsGroupBox.Controls.Add(this.label5);
             this.domainsGroupBox.Controls.Add(this.removeButton);
             this.domainsGroupBox.Controls.Add(this.domainsListBox);
-            this.domainsGroupBox.Location = new System.Drawing.Point(12, 921);
+            this.domainsGroupBox.Location = new System.Drawing.Point(6, 432);
+            this.domainsGroupBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.domainsGroupBox.Name = "domainsGroupBox";
-            this.domainsGroupBox.Size = new System.Drawing.Size(1326, 299);
+            this.domainsGroupBox.Padding = new System.Windows.Forms.Padding(2, 1, 2, 1);
+            this.domainsGroupBox.Size = new System.Drawing.Size(714, 145);
             this.domainsGroupBox.TabIndex = 37;
             this.domainsGroupBox.TabStop = false;
             this.domainsGroupBox.Text = "Domains*";
@@ -246,18 +257,20 @@ namespace WinCertes
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label4.Location = new System.Drawing.Point(17, 35);
+            this.label4.Location = new System.Drawing.Point(9, 16);
+            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(420, 32);
+            this.label4.Size = new System.Drawing.Size(207, 15);
             this.label4.TabIndex = 42;
             this.label4.Text = "Domains to Generate certifcate for:";
             // 
             // addButton
             // 
             this.addButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.addButton.Location = new System.Drawing.Point(1183, 241);
+            this.addButton.Location = new System.Drawing.Point(637, 118);
+            this.addButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.addButton.Name = "addButton";
-            this.addButton.Size = new System.Drawing.Size(130, 46);
+            this.addButton.Size = new System.Drawing.Size(70, 22);
             this.addButton.TabIndex = 41;
             this.addButton.Text = "Add";
             this.addButton.UseVisualStyleBackColor = true;
@@ -267,18 +280,20 @@ namespace WinCertes
             // 
             this.domainTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.domainTextBox.Location = new System.Drawing.Point(194, 245);
+            this.domainTextBox.Location = new System.Drawing.Point(104, 116);
+            this.domainTextBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.domainTextBox.Name = "domainTextBox";
-            this.domainTextBox.Size = new System.Drawing.Size(983, 39);
+            this.domainTextBox.Size = new System.Drawing.Size(531, 23);
             this.domainTextBox.TabIndex = 40;
             // 
             // label5
             // 
             this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(17, 248);
+            this.label5.Location = new System.Drawing.Point(9, 121);
+            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(158, 32);
+            this.label5.Size = new System.Drawing.Size(79, 15);
             this.label5.TabIndex = 39;
             this.label5.Text = "New Domain:";
             // 
@@ -286,9 +301,10 @@ namespace WinCertes
             // 
             this.removeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.removeButton.Enabled = false;
-            this.removeButton.Location = new System.Drawing.Point(1183, 70);
+            this.removeButton.Location = new System.Drawing.Point(637, 33);
+            this.removeButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.removeButton.Name = "removeButton";
-            this.removeButton.Size = new System.Drawing.Size(130, 46);
+            this.removeButton.Size = new System.Drawing.Size(70, 22);
             this.removeButton.TabIndex = 38;
             this.removeButton.Text = "Remove";
             this.removeButton.UseVisualStyleBackColor = true;
@@ -300,25 +316,27 @@ namespace WinCertes
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.domainsListBox.FormattingEnabled = true;
-            this.domainsListBox.ItemHeight = 32;
-            this.domainsListBox.Location = new System.Drawing.Point(17, 70);
+            this.domainsListBox.ItemHeight = 15;
+            this.domainsListBox.Location = new System.Drawing.Point(9, 33);
+            this.domainsListBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.domainsListBox.Name = "domainsListBox";
-            this.domainsListBox.Size = new System.Drawing.Size(1160, 164);
+            this.domainsListBox.Size = new System.Drawing.Size(626, 79);
             this.domainsListBox.TabIndex = 37;
             this.domainsListBox.SelectedIndexChanged += new System.EventHandler(this.domainsListBox_SelectedIndexChanged);
             // 
             // groupBox3
             // 
-            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox3.Controls.Add(this.psExecComboBox);
             this.groupBox3.Controls.Add(this.psExecCheckBox);
             this.groupBox3.Controls.Add(this.browseButton);
             this.groupBox3.Controls.Add(this.psScriptTextBox);
             this.groupBox3.Controls.Add(this.psScriptCheckBox);
-            this.groupBox3.Location = new System.Drawing.Point(12, 1226);
+            this.groupBox3.Location = new System.Drawing.Point(6, 579);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(1326, 145);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(2, 1, 2, 1);
+            this.groupBox3.Size = new System.Drawing.Size(714, 68);
             this.groupBox3.TabIndex = 38;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "PowerShell Core Script";
@@ -327,9 +345,10 @@ namespace WinCertes
             // 
             this.psExecComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.psExecComboBox.FormattingEnabled = true;
-            this.psExecComboBox.Location = new System.Drawing.Point(384, 89);
+            this.psExecComboBox.Location = new System.Drawing.Point(207, 42);
+            this.psExecComboBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.psExecComboBox.Name = "psExecComboBox";
-            this.psExecComboBox.Size = new System.Drawing.Size(379, 40);
+            this.psExecComboBox.Size = new System.Drawing.Size(206, 23);
             this.psExecComboBox.TabIndex = 34;
             this.psExecComboBox.SelectedIndexChanged += new System.EventHandler(this.psExecComboBox_SelectedIndexChanged);
             // 
@@ -337,9 +356,10 @@ namespace WinCertes
             // 
             this.psExecCheckBox.AutoSize = true;
             this.psExecCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.psExecCheckBox.Location = new System.Drawing.Point(6, 91);
+            this.psExecCheckBox.Location = new System.Drawing.Point(3, 43);
+            this.psExecCheckBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.psExecCheckBox.Name = "psExecCheckBox";
-            this.psExecCheckBox.Size = new System.Drawing.Size(372, 36);
+            this.psExecCheckBox.Size = new System.Drawing.Size(185, 19);
             this.psExecCheckBox.TabIndex = 33;
             this.psExecCheckBox.Text = "PowerShell Execution Policy:";
             this.psExecCheckBox.UseVisualStyleBackColor = true;
@@ -348,9 +368,10 @@ namespace WinCertes
             // browseButton
             // 
             this.browseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.browseButton.Location = new System.Drawing.Point(1183, 32);
+            this.browseButton.Location = new System.Drawing.Point(637, 15);
+            this.browseButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.browseButton.Name = "browseButton";
-            this.browseButton.Size = new System.Drawing.Size(130, 46);
+            this.browseButton.Size = new System.Drawing.Size(70, 22);
             this.browseButton.TabIndex = 32;
             this.browseButton.Text = "Browse";
             this.browseButton.UseVisualStyleBackColor = true;
@@ -360,9 +381,10 @@ namespace WinCertes
             // 
             this.psScriptTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.psScriptTextBox.Location = new System.Drawing.Point(358, 36);
+            this.psScriptTextBox.Location = new System.Drawing.Point(193, 17);
+            this.psScriptTextBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.psScriptTextBox.Name = "psScriptTextBox";
-            this.psScriptTextBox.Size = new System.Drawing.Size(819, 39);
+            this.psScriptTextBox.Size = new System.Drawing.Size(443, 23);
             this.psScriptTextBox.TabIndex = 31;
             this.psScriptTextBox.TextChanged += new System.EventHandler(this.psScriptTextBox_TextChanged);
             // 
@@ -370,9 +392,10 @@ namespace WinCertes
             // 
             this.psScriptCheckBox.AutoSize = true;
             this.psScriptCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.psScriptCheckBox.Location = new System.Drawing.Point(6, 38);
+            this.psScriptCheckBox.Location = new System.Drawing.Point(3, 18);
+            this.psScriptCheckBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.psScriptCheckBox.Name = "psScriptCheckBox";
-            this.psScriptCheckBox.Size = new System.Drawing.Size(346, 36);
+            this.psScriptCheckBox.Size = new System.Drawing.Size(176, 19);
             this.psScriptCheckBox.TabIndex = 30;
             this.psScriptCheckBox.Text = "Execute PowerShell Script:";
             this.psScriptCheckBox.UseVisualStyleBackColor = true;
@@ -383,9 +406,11 @@ namespace WinCertes
             this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox4.Controls.Add(this.taskCheckBox);
-            this.groupBox4.Location = new System.Drawing.Point(781, 345);
+            this.groupBox4.Location = new System.Drawing.Point(421, 162);
+            this.groupBox4.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(557, 177);
+            this.groupBox4.Padding = new System.Windows.Forms.Padding(2, 1, 2, 1);
+            this.groupBox4.Size = new System.Drawing.Size(300, 83);
             this.groupBox4.TabIndex = 39;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Scheduled Task";
@@ -394,9 +419,10 @@ namespace WinCertes
             // 
             this.taskCheckBox.AutoSize = true;
             this.taskCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.taskCheckBox.Location = new System.Drawing.Point(6, 38);
+            this.taskCheckBox.Location = new System.Drawing.Point(3, 18);
+            this.taskCheckBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.taskCheckBox.Name = "taskCheckBox";
-            this.taskCheckBox.Size = new System.Drawing.Size(503, 36);
+            this.taskCheckBox.Size = new System.Drawing.Size(249, 19);
             this.taskCheckBox.TabIndex = 35;
             this.taskCheckBox.Text = "Schedule a Task to Renew Automatically";
             this.taskCheckBox.UseVisualStyleBackColor = true;
@@ -405,7 +431,8 @@ namespace WinCertes
             // renewalNumericUpDown
             // 
             this.renewalNumericUpDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.renewalNumericUpDown.Location = new System.Drawing.Point(1165, 452);
+            this.renewalNumericUpDown.Location = new System.Drawing.Point(627, 212);
+            this.renewalNumericUpDown.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.renewalNumericUpDown.Maximum = new decimal(new int[] {
             30,
             0,
@@ -417,7 +444,7 @@ namespace WinCertes
             0,
             0});
             this.renewalNumericUpDown.Name = "renewalNumericUpDown";
-            this.renewalNumericUpDown.Size = new System.Drawing.Size(160, 39);
+            this.renewalNumericUpDown.Size = new System.Drawing.Size(86, 23);
             this.renewalNumericUpDown.TabIndex = 44;
             this.renewalNumericUpDown.Value = new decimal(new int[] {
             30,
@@ -431,9 +458,10 @@ namespace WinCertes
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(795, 452);
+            this.label1.Location = new System.Drawing.Point(428, 212);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(364, 32);
+            this.label1.Size = new System.Drawing.Size(178, 15);
             this.label1.TabIndex = 36;
             this.label1.Text = "Renew Days before Expiration:";
             // 
@@ -449,9 +477,11 @@ namespace WinCertes
             this.settingsGroupBox.Controls.Add(this.label8);
             this.settingsGroupBox.Controls.Add(this.emailTextBox);
             this.settingsGroupBox.Controls.Add(this.label6);
-            this.settingsGroupBox.Location = new System.Drawing.Point(12, 122);
+            this.settingsGroupBox.Location = new System.Drawing.Point(6, 57);
+            this.settingsGroupBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.settingsGroupBox.Name = "settingsGroupBox";
-            this.settingsGroupBox.Size = new System.Drawing.Size(1044, 217);
+            this.settingsGroupBox.Padding = new System.Windows.Forms.Padding(2, 1, 2, 1);
+            this.settingsGroupBox.Size = new System.Drawing.Size(562, 102);
             this.settingsGroupBox.TabIndex = 40;
             this.settingsGroupBox.TabStop = false;
             this.settingsGroupBox.Text = "Settings";
@@ -461,9 +491,10 @@ namespace WinCertes
             this.registeredLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.registeredLabel.AutoSize = true;
             this.registeredLabel.Font = new System.Drawing.Font("Segoe UI", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
-            this.registeredLabel.Location = new System.Drawing.Point(875, 35);
+            this.registeredLabel.Location = new System.Drawing.Point(471, 16);
+            this.registeredLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.registeredLabel.Name = "registeredLabel";
-            this.registeredLabel.Size = new System.Drawing.Size(153, 32);
+            this.registeredLabel.Size = new System.Drawing.Size(76, 15);
             this.registeredLabel.TabIndex = 33;
             this.registeredLabel.Text = "REGISTERED";
             this.registeredLabel.Visible = false;
@@ -471,9 +502,10 @@ namespace WinCertes
             // iisRadioButton
             // 
             this.iisRadioButton.AutoSize = true;
-            this.iisRadioButton.Location = new System.Drawing.Point(434, 151);
+            this.iisRadioButton.Location = new System.Drawing.Point(234, 71);
+            this.iisRadioButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.iisRadioButton.Name = "iisRadioButton";
-            this.iisRadioButton.Size = new System.Drawing.Size(205, 36);
+            this.iisRadioButton.Size = new System.Drawing.Size(103, 19);
             this.iisRadioButton.TabIndex = 31;
             this.iisRadioButton.TabStop = true;
             this.iisRadioButton.Text = "Local IIS Server";
@@ -483,9 +515,10 @@ namespace WinCertes
             // standaloneRadioButton
             // 
             this.standaloneRadioButton.AutoSize = true;
-            this.standaloneRadioButton.Location = new System.Drawing.Point(116, 151);
+            this.standaloneRadioButton.Location = new System.Drawing.Point(62, 71);
+            this.standaloneRadioButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.standaloneRadioButton.Name = "standaloneRadioButton";
-            this.standaloneRadioButton.Size = new System.Drawing.Size(301, 36);
+            this.standaloneRadioButton.Size = new System.Drawing.Size(150, 19);
             this.standaloneRadioButton.TabIndex = 30;
             this.standaloneRadioButton.TabStop = true;
             this.standaloneRadioButton.Text = "Standalone HTTP Server";
@@ -496,9 +529,10 @@ namespace WinCertes
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label9.Location = new System.Drawing.Point(6, 153);
+            this.label9.Location = new System.Drawing.Point(3, 72);
+            this.label9.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(95, 32);
+            this.label9.Size = new System.Drawing.Size(48, 15);
             this.label9.TabIndex = 29;
             this.label9.Text = "Server:";
             // 
@@ -507,9 +541,10 @@ namespace WinCertes
             this.serviceComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.serviceComboBox.FormattingEnabled = true;
-            this.serviceComboBox.Location = new System.Drawing.Point(116, 89);
+            this.serviceComboBox.Location = new System.Drawing.Point(62, 42);
+            this.serviceComboBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.serviceComboBox.Name = "serviceComboBox";
-            this.serviceComboBox.Size = new System.Drawing.Size(753, 40);
+            this.serviceComboBox.Size = new System.Drawing.Size(407, 23);
             this.serviceComboBox.TabIndex = 28;
             this.serviceComboBox.TextUpdate += new System.EventHandler(this.serviceComboBox_TextUpdate);
             this.serviceComboBox.DropDownClosed += new System.EventHandler(this.serviceComboBox_DropDownClosed);
@@ -518,9 +553,10 @@ namespace WinCertes
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label8.Location = new System.Drawing.Point(6, 92);
+            this.label8.Location = new System.Drawing.Point(3, 43);
+            this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(103, 32);
+            this.label8.Size = new System.Drawing.Size(52, 15);
             this.label8.TabIndex = 27;
             this.label8.Text = "Service:";
             // 
@@ -528,9 +564,10 @@ namespace WinCertes
             // 
             this.emailTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.emailTextBox.Location = new System.Drawing.Point(116, 32);
+            this.emailTextBox.Location = new System.Drawing.Point(62, 15);
+            this.emailTextBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.emailTextBox.Name = "emailTextBox";
-            this.emailTextBox.Size = new System.Drawing.Size(753, 39);
+            this.emailTextBox.Size = new System.Drawing.Size(407, 23);
             this.emailTextBox.TabIndex = 26;
             this.emailTextBox.TextChanged += new System.EventHandler(this.emailTextBox_TextChanged);
             // 
@@ -538,9 +575,10 @@ namespace WinCertes
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label6.Location = new System.Drawing.Point(6, 35);
+            this.label6.Location = new System.Drawing.Point(3, 16);
+            this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(104, 32);
+            this.label6.Size = new System.Drawing.Size(50, 15);
             this.label6.TabIndex = 25;
             this.label6.Text = "e-mail*:";
             // 
@@ -549,9 +587,10 @@ namespace WinCertes
             this.issueButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.issueButton.Enabled = false;
             this.issueButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.issueButton.Location = new System.Drawing.Point(1078, 275);
+            this.issueButton.Location = new System.Drawing.Point(580, 129);
+            this.issueButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.issueButton.Name = "issueButton";
-            this.issueButton.Size = new System.Drawing.Size(257, 46);
+            this.issueButton.Size = new System.Drawing.Size(138, 22);
             this.issueButton.TabIndex = 35;
             this.issueButton.Text = "Issue Certificate";
             this.issueButton.UseVisualStyleBackColor = true;
@@ -560,9 +599,10 @@ namespace WinCertes
             // revokeButton
             // 
             this.revokeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.revokeButton.Location = new System.Drawing.Point(1078, 207);
+            this.revokeButton.Location = new System.Drawing.Point(580, 97);
+            this.revokeButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.revokeButton.Name = "revokeButton";
-            this.revokeButton.Size = new System.Drawing.Size(257, 46);
+            this.revokeButton.Size = new System.Drawing.Size(138, 22);
             this.revokeButton.TabIndex = 34;
             this.revokeButton.Text = "Revoke Certificate";
             this.revokeButton.UseVisualStyleBackColor = true;
@@ -572,9 +612,10 @@ namespace WinCertes
             // certButton
             // 
             this.certButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.certButton.Location = new System.Drawing.Point(1078, 143);
+            this.certButton.Location = new System.Drawing.Point(580, 67);
+            this.certButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.certButton.Name = "certButton";
-            this.certButton.Size = new System.Drawing.Size(257, 46);
+            this.certButton.Size = new System.Drawing.Size(138, 22);
             this.certButton.TabIndex = 32;
             this.certButton.Text = "Show Certificate";
             this.certButton.UseVisualStyleBackColor = true;
@@ -588,23 +629,26 @@ namespace WinCertes
             this.standaloneGroupBox.Controls.Add(this.inUseLabel);
             this.standaloneGroupBox.Controls.Add(this.label12);
             this.standaloneGroupBox.Controls.Add(this.label11);
-            this.standaloneGroupBox.Location = new System.Drawing.Point(12, 345);
+            this.standaloneGroupBox.Location = new System.Drawing.Point(6, 162);
+            this.standaloneGroupBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.standaloneGroupBox.Name = "standaloneGroupBox";
-            this.standaloneGroupBox.Size = new System.Drawing.Size(763, 177);
+            this.standaloneGroupBox.Padding = new System.Windows.Forms.Padding(2, 1, 2, 1);
+            this.standaloneGroupBox.Size = new System.Drawing.Size(411, 83);
             this.standaloneGroupBox.TabIndex = 41;
             this.standaloneGroupBox.TabStop = false;
             this.standaloneGroupBox.Text = "Standalone HTTP Server Settings";
             // 
             // httpPortNumericUpDown
             // 
-            this.httpPortNumericUpDown.Location = new System.Drawing.Point(162, 38);
+            this.httpPortNumericUpDown.Location = new System.Drawing.Point(87, 18);
+            this.httpPortNumericUpDown.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.httpPortNumericUpDown.Maximum = new decimal(new int[] {
             100000,
             0,
             0,
             0});
             this.httpPortNumericUpDown.Name = "httpPortNumericUpDown";
-            this.httpPortNumericUpDown.Size = new System.Drawing.Size(153, 39);
+            this.httpPortNumericUpDown.Size = new System.Drawing.Size(82, 23);
             this.httpPortNumericUpDown.TabIndex = 5;
             this.httpPortNumericUpDown.Value = new decimal(new int[] {
             80,
@@ -615,9 +659,10 @@ namespace WinCertes
             // 
             // checkPortButton
             // 
-            this.checkPortButton.Location = new System.Drawing.Point(568, 32);
+            this.checkPortButton.Location = new System.Drawing.Point(306, 15);
+            this.checkPortButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.checkPortButton.Name = "checkPortButton";
-            this.checkPortButton.Size = new System.Drawing.Size(189, 46);
+            this.checkPortButton.Size = new System.Drawing.Size(102, 22);
             this.checkPortButton.TabIndex = 4;
             this.checkPortButton.Text = "Check Port";
             this.checkPortButton.UseVisualStyleBackColor = true;
@@ -629,18 +674,20 @@ namespace WinCertes
             this.inUseLabel.AutoSize = true;
             this.inUseLabel.Font = new System.Drawing.Font("Segoe UI", 9F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
             this.inUseLabel.ForeColor = System.Drawing.Color.Red;
-            this.inUseLabel.Location = new System.Drawing.Point(330, 41);
+            this.inUseLabel.Location = new System.Drawing.Point(178, 19);
+            this.inUseLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.inUseLabel.Name = "inUseLabel";
-            this.inUseLabel.Size = new System.Drawing.Size(160, 32);
+            this.inUseLabel.Size = new System.Drawing.Size(80, 15);
             this.inUseLabel.TabIndex = 3;
             this.inUseLabel.Text = "PORT IN USE";
             this.inUseLabel.Visible = false;
             // 
             // label12
             // 
-            this.label12.Location = new System.Drawing.Point(6, 93);
+            this.label12.Location = new System.Drawing.Point(3, 44);
+            this.label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(728, 65);
+            this.label12.Size = new System.Drawing.Size(392, 30);
             this.label12.TabIndex = 2;
             this.label12.Text = "All Challenges are processed on Port 80, if you use a different port above you mu" +
     "st set Port Forwarding on your Router accordingly.";
@@ -649,9 +696,10 @@ namespace WinCertes
             // 
             this.label11.AutoSize = true;
             this.label11.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label11.Location = new System.Drawing.Point(6, 41);
+            this.label11.Location = new System.Drawing.Point(3, 19);
+            this.label11.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(150, 32);
+            this.label11.Size = new System.Drawing.Size(75, 15);
             this.label11.TabIndex = 0;
             this.label11.Text = "Server Port:";
             // 
@@ -659,9 +707,10 @@ namespace WinCertes
             // 
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label10.Location = new System.Drawing.Point(18, 53);
+            this.label10.Location = new System.Drawing.Point(10, 25);
+            this.label10.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(181, 32);
+            this.label10.Size = new System.Drawing.Size(86, 15);
             this.label10.TabIndex = 42;
             this.label10.Text = "Configuration:";
             // 
@@ -671,18 +720,20 @@ namespace WinCertes
             | System.Windows.Forms.AnchorStyles.Right)));
             this.configsComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.configsComboBox.FormattingEnabled = true;
-            this.configsComboBox.Location = new System.Drawing.Point(206, 53);
+            this.configsComboBox.Location = new System.Drawing.Point(111, 25);
+            this.configsComboBox.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.configsComboBox.Name = "configsComboBox";
-            this.configsComboBox.Size = new System.Drawing.Size(453, 40);
+            this.configsComboBox.Size = new System.Drawing.Size(246, 23);
             this.configsComboBox.TabIndex = 43;
             this.configsComboBox.SelectedIndexChanged += new System.EventHandler(this.configsComboBox_SelectedIndexChanged);
             // 
             // deleteButton
             // 
             this.deleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.deleteButton.Location = new System.Drawing.Point(665, 49);
+            this.deleteButton.Location = new System.Drawing.Point(358, 23);
+            this.deleteButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.deleteButton.Name = "deleteButton";
-            this.deleteButton.Size = new System.Drawing.Size(150, 46);
+            this.deleteButton.Size = new System.Drawing.Size(81, 22);
             this.deleteButton.TabIndex = 44;
             this.deleteButton.Text = "Delete";
             this.deleteButton.UseVisualStyleBackColor = true;
@@ -691,9 +742,10 @@ namespace WinCertes
             // newConfigButton
             // 
             this.newConfigButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.newConfigButton.Location = new System.Drawing.Point(1078, 46);
+            this.newConfigButton.Location = new System.Drawing.Point(580, 22);
+            this.newConfigButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.newConfigButton.Name = "newConfigButton";
-            this.newConfigButton.Size = new System.Drawing.Size(257, 46);
+            this.newConfigButton.Size = new System.Drawing.Size(138, 22);
             this.newConfigButton.TabIndex = 45;
             this.newConfigButton.Text = "New Configuration";
             this.newConfigButton.UseVisualStyleBackColor = true;
@@ -705,16 +757,17 @@ namespace WinCertes
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.actionToolStripStatusLabel,
             this.actionToolStripProgressBar});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 1387);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 654);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1354, 42);
+            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 8, 0);
+            this.statusStrip1.Size = new System.Drawing.Size(734, 22);
             this.statusStrip1.TabIndex = 46;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // actionToolStripStatusLabel
             // 
             this.actionToolStripStatusLabel.Name = "actionToolStripStatusLabel";
-            this.actionToolStripStatusLabel.Size = new System.Drawing.Size(1339, 32);
+            this.actionToolStripStatusLabel.Size = new System.Drawing.Size(725, 17);
             this.actionToolStripStatusLabel.Spring = true;
             this.actionToolStripStatusLabel.Text = "WinCertes";
             this.actionToolStripStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -723,15 +776,15 @@ namespace WinCertes
             // 
             this.actionToolStripProgressBar.AutoSize = false;
             this.actionToolStripProgressBar.Name = "actionToolStripProgressBar";
-            this.actionToolStripProgressBar.Size = new System.Drawing.Size(300, 30);
+            this.actionToolStripProgressBar.Size = new System.Drawing.Size(162, 16);
             this.actionToolStripProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.actionToolStripProgressBar.Visible = false;
             // 
             // WinCertesForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 32F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1354, 1429);
+            this.ClientSize = new System.Drawing.Size(734, 676);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.renewalNumericUpDown);
             this.Controls.Add(this.issueButton);
@@ -750,7 +803,8 @@ namespace WinCertes
             this.Controls.Add(this.domainsGroupBox);
             this.HelpButton = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(1380, 1500);
+            this.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
+            this.MinimumSize = new System.Drawing.Size(750, 507);
             this.Name = "WinCertesForm";
             this.Text = "WinCertes";
             this.HelpButtonClicked += new System.ComponentModel.CancelEventHandler(this.WinCertesForm_HelpButtonClicked);

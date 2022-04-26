@@ -2,17 +2,18 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net5.0-windows</TargetFramework>
+		<TargetFramework>net6.0-windows</TargetFramework>
 		<UseWindowsForms>true</UseWindowsForms>
-		<Version>1.5.8</Version>
-		<AssemblyVersion>1.5.8.0</AssemblyVersion>
-		<FileVersion>1.5.8.0</FileVersion>
+		<Version>1.5.9</Version>
+		<AssemblyVersion>1.5.9.0</AssemblyVersion>
+		<FileVersion>1.5.9.0</FileVersion>
 		<StartupObject>WinCertes.Program</StartupObject>
 		<RootNamespace>WinCertes</RootNamespace>
 		<AssemblyName>WinCertes</AssemblyName>
 		<ApplicationIcon>WinCertes.ico</ApplicationIcon>
 		<DisableWinExeOutputInference>true</DisableWinExeOutputInference>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -24,26 +25,33 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AWSSDK.Core" Version="3.7.2.9" />
-		<PackageReference Include="AWSSDK.Route53" Version="3.7.1.14" />
-		<PackageReference Include="Certes" Version="3.0.0" />
-		<PackageReference Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.1.4" />
-		<PackageReference Include="Microsoft.PowerShell.Commands.Management" Version="7.1.4" />
-		<PackageReference Include="Microsoft.PowerShell.Commands.Utility" Version="7.1.4" />
-		<PackageReference Include="Microsoft.PowerShell.ConsoleHost" Version="7.1.4" />
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AWSSDK.Core" Version="3.7.10.11" />
+		<PackageReference Include="AWSSDK.Route53" Version="3.7.2.46" />
+		<PackageReference Include="Certes" Version="3.0.3" />
+		<PackageReference Include="Microsoft.PowerShell.Commands.Diagnostics" Version="7.2.2" />
+		<PackageReference Include="Microsoft.PowerShell.Commands.Management" Version="7.2.2" />
+		<PackageReference Include="Microsoft.PowerShell.Commands.Utility" Version="7.2.2" />
+		<PackageReference Include="Microsoft.PowerShell.ConsoleHost" Version="7.2.2" />
 		<PackageReference Include="Microsoft.Web.Administration" Version="11.1.0" />
-		<PackageReference Include="Microsoft.WSMan.Management" Version="7.1.4" />
-		<PackageReference Include="Microsoft.WSMan.Runtime" Version="7.1.4" />
+		<PackageReference Include="Microsoft.WSMan.Management" Version="7.2.2" />
+		<PackageReference Include="Microsoft.WSMan.Runtime" Version="7.2.2" />
 		<PackageReference Include="Mono.Options" Version="6.12.0.148" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<PackageReference Include="NLog" Version="4.7.11" />
-		<PackageReference Include="Portable.BouncyCastle" Version="1.8.10" />
+		<PackageReference Include="NLog" Version="4.7.15" />
+		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
 		<PackageReference Include="System.Diagnostics.Tracing" Version="4.3.0" />
 		<PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
 		<PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
 		<PackageReference Include="System.Net.Primitives" Version="4.3.1" />
 		<PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
-		<PackageReference Include="TaskScheduler" Version="2.9.1" />
+		<PackageReference Include="TaskScheduler" Version="2.10.1" />
 	</ItemGroup>
 
 	<ItemGroup>
