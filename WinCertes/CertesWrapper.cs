@@ -203,11 +203,11 @@ namespace WinCertes
                 var dnsChallenge = await authz.Dns();
                 if (dnsChallenge != null)
                 {
-                    _logger.Debug($"Initiating DNS Validation for {res.Identifier.Value}");
+                    _logger.Debug($"{Resources.CertesWrapper.InitDNS} {res.Identifier.Value}");
                     var resValidation = await ValidateDNSChallenge(res.Identifier.Value, dnsChallenge, dnsChallengeValidator);
-                    if (!resValidation) throw new Exception($"Could not validate DNS challenge:\n {dnsChallenge.Resource().Result.Error.Detail}");
+                    if (!resValidation) throw new Exception($"{Resources.CertesWrapper.NoDNSChallenge}\n {dnsChallenge.Resource().Result.Error.Detail}");
                 }
-                else throw new Exception("DNS Challenge Validation set up, but server sent no DNS Challenge");
+                else throw new Exception(Resources.CertesWrapper.ErrorDNS);
             }
             else
             {
@@ -215,11 +215,11 @@ namespace WinCertes
                 var httpChallenge = await authz.Http();
                 if (httpChallenge != null)
                 {
-                    _logger.Debug($"Initiating HTTP Validation for {res.Identifier.Value}");
+                    _logger.Debug($"{Resources.CertesWrapper.InitHTTP} {res.Identifier.Value}");
                     var resValidation = await ValidateHTTPChallenge(httpChallenge, httpChallengeValidator);
-                    if (!resValidation) throw new Exception($"Could not validate HTTP challenge:\n {httpChallenge.Resource().Result.Error.Detail}");
+                    if (!resValidation) throw new Exception($"{Resources.CertesWrapper.NoHTTPChallenge}\n {httpChallenge.Resource().Result.Error.Detail}");
                 }
-                else throw new Exception("HTTP Challenge Validation set up, but server sent no HTTP Challenge");
+                else throw new Exception(Resources.CertesWrapper.ErrorHTTP);
             }
         }
 

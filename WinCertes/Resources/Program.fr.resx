@@ -1,0 +1,236 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Error" xml:space="preserve">
+    <value>Erreur</value>
+  </data>
+  <data name="ExampleUsage" xml:space="preserve">
+    <value>
+Utilisation typique: WinCertes.exe -a -e me@example.com -d test1.example.com -d test2.example.com -p
+Cela créera et enregistrera automatiquement un compte avec l'email me@example.com, et
+demandez le certificat pour test1.example.com et test2.example.com, puis importez-le dans
+Magasin de certificats Windows (contexte de la machine) et enfin définir une tâche planifiée pour 
+gérer le renouvellement.
+
+"WinCertes.exe -d test1.example.com -d test2.example.com -r" révoquera ce certificat.</value>
+  </data>
+  <data name="FailedRegisterAccount" xml:space="preserve">
+    <value>Impossible d'enregistrer le compte de service ACME.</value>
+  </data>
+  <data name="HTTPorDNS" xml:space="preserve">
+    <value>Spécifiez une méthode de validation HTTP ou DNS.</value>
+  </data>
+  <data name="LaunchGUI" xml:space="preserve">
+    <value>WinCertes.exe: Lancé sans options de ligne de commande, utilisez -? pour les afficher. Lancement de l'interface graphique...</value>
+  </data>
+  <data name="NoAdmin" xml:space="preserve">
+    <value>WinCertes.exe: Doit être lancé en tant qu'administrateur.</value>
+  </data>
+  <data name="NoAdminGUI" xml:space="preserve">
+    <value>WinCertes.exe: Doit être lancé en tant qu'administrateur.\nMaintenez les touches Ctrl et Maj enfoncées pendant que vous cliquez sur l'icône WinCertes dans le menu Démarrer.</value>
+  </data>
+  <data name="NoBound" xml:space="preserve">
+    <value>Certificat non lié à un site IIS.</value>
+  </data>
+  <data name="NoCLIforGUI" xml:space="preserve">
+    <value>N'utilisez aucun argument de ligne de commande pour lancer l'interface graphique
+</value>
+  </data>
+  <data name="NoDomains" xml:space="preserve">
+    <value>Au moins un domaine doit être spécifié</value>
+  </data>
+  <data name="NoFindCertificateDomain" xml:space="preserve">
+    <value>Impossible de trouver le certificat correspondant au domaine principal {0}. Veuillez vérifier le sujet CN du certificat que vous souhaitez révoquer.</value>
+  </data>
+  <data name="NoFindCertificateSerial" xml:space="preserve">
+    <value>Impossible de trouver le certificat correspondant au numéro de série {0}. Veuillez vérifier le magasin de certificats.</value>
+  </data>
+  <data name="OptionBindName" xml:space="preserve">
+    <value>Nom du site IIS auquel lier le certificat, par ex. "Default Web Site". Par défaut, aucune liaison</value>
+  </data>
+  <data name="OptionBindPort" xml:space="preserve">
+    <value>Port du site IIS auquel lier le certificat, par ex. 443. La valeur par défaut est 443, utilisée uniquement si -b est spécifié</value>
+  </data>
+  <data name="OptionCSP" xml:space="preserve">
+    <value>importer le certificat dans le csp spécifié. Par défaut WinCertes importe dans le CSP par défaut</value>
+  </data>
+  <data name="OptionDomain" xml:space="preserve">
+    <value>le(s) domaine(s) à inscrire (obligatoire)</value>
+  </data>
+  <data name="OptionEmail" xml:space="preserve">
+    <value>l'adresse e-mail du compte à utiliser pour les demandes ACME (facultatif, pas d'e-mail par défaut)</value>
+  </data>
+  <data name="OptionExecPolicy" xml:space="preserve">
+    <value>Spécifiez la stratégie d'exécution pour exécuter le fichier de script PowerShell, par ex. Illimité (par défaut=Undefined)</value>
+  </data>
+  <data name="OptionExtra" xml:space="preserve">
+    <value>gère des certificats supplémentaires au lieu de celui par défaut, avec ses propres paramètres. Ajouter un index entier en option pour gérer plus de certificats</value>
+  </data>
+  <data name="OptionHelp" xml:space="preserve">
+    <value>affiche cet écran d'aide</value>
+  </data>
+  <data name="OptionListenPort" xml:space="preserve">
+    <value>écouter sur le port {N} en mode autonome (à utiliser avec le commutateur -a, 80 par défaut)</value>
+  </data>
+  <data name="OptionNoCSP" xml:space="preserve">
+    <value>n'importe pas le certificat dans CSP. A utiliser avec prudence, à vos risques et périls. LA RÉVOCATION NE FONCTIONNERA PAS DANS CE MODE</value>
+  </data>
+  <data name="OptionPeriodic" xml:space="preserve">
+    <value>WinCertes devrait-il créer la tâche du planificateur Windows pour gérer le renouvellement du certificat (par défaut = non)</value>
+  </data>
+  <data name="OptionRenewal" xml:space="preserve">
+    <value>déclencher le renouvellement du certificat {N} jours avant l'expiration, par défaut 30</value>
+  </data>
+  <data name="OptionReset" xml:space="preserve">
+    <value>réinitialiser tous les paramètres de configuration</value>
+  </data>
+  <data name="OptionRevoke" xml:space="preserve">
+    <value>si WinCertes révoque le certificat identifié par ses domaines (à utiliser uniquement avec -d). {REASON} est un entier facultatif compris entre 0 et 5</value>
+  </data>
+  <data name="OptionScriptFile" xml:space="preserve">
+    <value>Fichier de script PowerShell Core, par ex. "C:\Temp\script.ps1" à exécuter en cas d'inscription réussie (par défaut = aucun)</value>
+  </data>
+  <data name="OptionService" xml:space="preserve">
+    <value>l'URI du service ACME à utiliser (facultatif, par défaut Let's Encrypt)</value>
+  </data>
+  <data name="OptionSetOpt" xml:space="preserve">
+    <value>définit les options de configuration sous la forme clé:valeur</value>
+  </data>
+  <data name="OptionShow" xml:space="preserve">
+    <value>afficher les paramètres de configuration actuels</value>
+  </data>
+  <data name="OptionSNI" xml:space="preserve">
+    <value>ajouter l'indicateur SSL d'indication de nom de serveur lors de la liaison à IIS</value>
+  </data>
+  <data name="OptionStandalone" xml:space="preserve">
+    <value>si WinCertes crée son propre serveur Web pour la validation. Active le mode de validation HTTP. ATTENTION : il utilisera le port 80 sauf si -l est spécifié</value>
+  </data>
+  <data name="OptionWebServer" xml:space="preserve">
+    <value>bascule l'utilisation du serveur Web local et définit son répertoire {ROOT} (par défaut c:\inetpub\wwwroot). Active le mode de validation HTTP</value>
+  </data>
+  <data name="RevokeReason" xml:space="preserve">
+    <value>Le motif de révocation est un nombre compris entre 0 et 5</value>
+  </data>
+  <data name="SuccessBind" xml:space="preserve">
+    <value>Certificat lié avec succès pour le site IIS:</value>
+  </data>
+  <data name="SuccessRevokeSerialDomains" xml:space="preserve">
+    <value>Le certificat avec le numéro de série {0} pour les domaines {1} a été révoqué avec succès.</value>
+  </data>
+</root>

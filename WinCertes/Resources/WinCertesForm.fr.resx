@@ -1,0 +1,536 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Add" xml:space="preserve">
+    <value>Ajouter</value>
+  </data>
+  <data name="AreYouSure" xml:space="preserve">
+    <value>Êtes-vous sûr?</value>
+  </data>
+  <data name="AttemptRebind" xml:space="preserve">
+    <value>Cela tentera de relier le certificat au site IIS.</value>
+  </data>
+  <data name="BindIISSite" xml:space="preserve">
+    <value>Lier au site IIS</value>
+  </data>
+  <data name="BindingCertificateIIS" xml:space="preserve">
+    <value>Certificat contraignant pour IIS si nécessaire...</value>
+  </data>
+  <data name="BindingCertToIIS" xml:space="preserve">
+    <value>Certificat de liaison au site IIS...</value>
+  </data>
+  <data name="BindOnRenewal" xml:space="preserve">
+    <value>Cela liera le certificat lors du renouvellement.</value>
+  </data>
+  <data name="Browse" xml:space="preserve">
+    <value>Parcourir</value>
+  </data>
+  <data name="CertificateDeleted" xml:space="preserve">
+    <value>Certificat supprimé avec succès.</value>
+  </data>
+  <data name="CertificateHasBeenDeleted" xml:space="preserve">
+    <value>Le certificat a été supprimé avec succès.</value>
+  </data>
+  <data name="CertificateHasBeenIssued" xml:space="preserve">
+    <value>Le certificat a été délivré avec succès.</value>
+  </data>
+  <data name="CertificateHasBeenRevoked" xml:space="preserve">
+    <value>Le certificat a été révoqué avec succès.</value>
+  </data>
+  <data name="CertificateIssued" xml:space="preserve">
+    <value>Certificat délivré.</value>
+  </data>
+  <data name="CertificateRevoked" xml:space="preserve">
+    <value>Certificat révoqué avec succès.</value>
+  </data>
+  <data name="CertificateWillBeBound" xml:space="preserve">
+    <value>Le certificat sera lié au site IIS</value>
+  </data>
+  <data name="ChallengeNeedsSite" xml:space="preserve">
+    <value>Le site IIS est requis pour la réponse au défi.</value>
+  </data>
+  <data name="CheckPort" xml:space="preserve">
+    <value>Vérifier le port</value>
+  </data>
+  <data name="Configuration" xml:space="preserve">
+    <value>Configuration:</value>
+  </data>
+  <data name="ConfirmDeleteCertificate" xml:space="preserve">
+    <value>Souhaitez-vous supprimer le certificat et réinitialiser la configuration?</value>
+  </data>
+  <data name="ConfirmDeleteConfiguration" xml:space="preserve">
+    <value>Êtes-vous sûr de vouloir supprimer la configuration supplémentaire</value>
+  </data>
+  <data name="ConfirmGenerateCertificateDomainsServiceEmail" xml:space="preserve">
+    <value>Êtes-vous sûr de vouloir générer un certificat pour les domaines suivants {0} en utilisant un service sur {1} et en vous inscrivant avec l'adresse e-mail {2}.</value>
+  </data>
+  <data name="ConfirmNewConfiguration" xml:space="preserve">
+    <value>Êtes-vous sûr de vouloir créer une nouvelle configuration supplémentaire:</value>
+  </data>
+  <data name="ConfirmRevokeCertificate" xml:space="preserve">
+    <value>Êtes-vous sûr de vouloir révoquer et supprimer le certificat?</value>
+  </data>
+  <data name="ConfirmUpdateSettings" xml:space="preserve">
+    <value>Voulez-vous vraiment mettre à jour les paramètres?</value>
+  </data>
+  <data name="CreateNewConfiguration" xml:space="preserve">
+    <value>Créer une nouvelle configuration</value>
+  </data>
+  <data name="CreatingTask" xml:space="preserve">
+    <value>Création d'une tâche planifiée...</value>
+  </data>
+  <data name="CreatingTaskIfRequired" xml:space="preserve">
+    <value>Création d'une tâche planifiée si nécessaire...</value>
+  </data>
+  <data name="DaysBeforeRenewal" xml:space="preserve">
+    <value>Les jours avant la période de renouvellement seront mis à jour pour</value>
+  </data>
+  <data name="DefaultConfiguration" xml:space="preserve">
+    <value>Configuration par défaut</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Effacer</value>
+  </data>
+  <data name="DeletingTask" xml:space="preserve">
+    <value>Suppression de la tâche planifiée...</value>
+  </data>
+  <data name="Domains" xml:space="preserve">
+    <value>Domaines</value>
+  </data>
+  <data name="DomainsRequired" xml:space="preserve">
+    <value>Les domaines pour lesquels générer un certificat sont requis.</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>e-mail*:</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Erreur</value>
+  </data>
+  <data name="ErrorACMEServiceEmail" xml:space="preserve">
+    <value>Impossible d'enregistrer le compte de service ACME avec l'adresse de service: {0} et l'adresse e-mail: {1}</value>
+  </data>
+  <data name="ErrorBindingCertificateGenerated" xml:space="preserve">
+    <value>Erreur de liaison au site IIS, mais certificat généré.</value>
+  </data>
+  <data name="ErrorFailedCleaningUp" xml:space="preserve">
+    <value>Échec de la vérification, nettoyage...</value>
+  </data>
+  <data name="ErrorFindCertificate" xml:space="preserve">
+    <value>Impossible de trouver la configuration ou la configuration ne correspond pas aux domaines de certificat.</value>
+  </data>
+  <data name="ErrorGetBinding" xml:space="preserve">
+    <value>Impossible de lire la liaison IIS, essayez de réinitialiser IIS, en continuant:</value>
+  </data>
+  <data name="ErrorGetBindingFail" xml:space="preserve">
+    <value>Impossible de lire la liaison IIS, essayez de réinitialiser IIS, en cassant:</value>
+  </data>
+  <data name="ErrorIssuingCertificate" xml:space="preserve">
+    <value>Erreur lors de l'émission du certificat.</value>
+  </data>
+  <data name="ErrorRetrievingCertificate" xml:space="preserve">
+    <value>Impossible de récupérer le certificat généré.</value>
+  </data>
+  <data name="ErrorRevokingCertificate" xml:space="preserve">
+    <value>Erreur lors de la révocation du certificat, il pourrait déjà être révoqué.</value>
+  </data>
+  <data name="ErrorSpecifyHTTPorDNS" xml:space="preserve">
+    <value>Spécifiez une méthode de validation HTTP ou DNS.</value>
+  </data>
+  <data name="ExecutePS" xml:space="preserve">
+    <value>Exécutez le script PowerShell:</value>
+  </data>
+  <data name="ExecutingPS" xml:space="preserve">
+    <value>Exécution du script PowerShell si nécessaire...</value>
+  </data>
+  <data name="Extra" xml:space="preserve">
+    <value>En plus</value>
+  </data>
+  <data name="ExtraConfiguration" xml:space="preserve">
+    <value>Configuration supplémentaire:</value>
+  </data>
+  <data name="FailedCertBindIIS" xml:space="preserve">
+    <value>Le certificat n'a pas pu se lier au site IIS.</value>
+  </data>
+  <data name="GenerateCertificate" xml:space="preserve">
+    <value>Générer un certificat?</value>
+  </data>
+  <data name="GenerateDomains" xml:space="preserve">
+    <value>Domaines pour générer un certificat pour:</value>
+  </data>
+  <data name="GettingExistingCertificate" xml:space="preserve">
+    <value>Obtention du certificat existant à partir de la configuration...</value>
+  </data>
+  <data name="GettingHTTPValidator" xml:space="preserve">
+    <value>Obtention du validateur HTTP...</value>
+  </data>
+  <data name="Help" xml:space="preserve">
+    <value>Aider</value>
+  </data>
+  <data name="HelpText" xml:space="preserve">
+    <value>WinCertes vous permet de générer un certificat gratuit en utilisant Lets Encrypt ou un service de votre choix.
+Vous devez commencer par entrer l'adresse e-mail avec laquelle vous allez enregistrer le certificat.
+Si vous utilisez IIS, sélectionnez simplement le bouton radio Serveur IIS local, sélectionnez maintenant le site IIS que vous utiliserez pour la réponse au défi et si vous souhaitez lier le certificat après, cochez la case Lier au site IIS. Si vous hébergez plusieurs domaines, vous voudrez peut-être vous assurer que l'indication du nom du serveur est cochée.
+Si vous utilisez le serveur HTTP autonome, sélectionnez le bouton radio Serveur HTTP autonome et assurez-vous que le port du serveur est libre, vous pouvez toujours sélectionner un site IIS si vous souhaitez lier le certificat à un après l'avoir généré.
+La boîte Domaines doit contenir la liste des domaines pour lesquels générer le certificat, si le site IIS a déjà des liaisons, les noms seront automatiquement ajoutés, sinon vous devez ajouter tous les domaines que vous souhaitez ajouter au certificat, rappelez-vous, cela doit également inclure www.
+Si vous souhaitez renouveler automatiquement, sélectionnez Planifier une tâche pour un renouvellement automatique, 30 jours est la durée de renouvellement par défaut, elle peut être inférieure si vous le souhaitez.
+Si vous souhaitez exécuter un script PowerShell après avoir généré le certificat, cliquez sur Parcourir et sélectionnez-le dans le système de fichiers, ou saisissez-le dans la case Exécuter le script PowerShell, la case à cocher doit être cochée automatiquement. Si vous avez besoin que la stratégie d'exécution soit plus élevée, sélectionnez-en une dans la liste déroulante de la stratégie d'exécution PowerShell.
+Cliquez maintenant sur Émettre un certificat pour générer le certificat.
+Une fois le certificat généré, vous pouvez afficher le certificat en appuyant sur Afficher le certificat.
+Si vous devez révoquer le certificat, appuyez sur le bouton Révoquer le certificat.
+Vous pouvez modifier les paramètres à tout moment, prêt pour le prochain renouvellement, ou cela liera le certificat à un autre site IIS pour vous.
+En cas de problème, veuillez signaler le problème au référentiel peterlgarland/WinCertes GitHub.</value>
+  </data>
+  <data name="IIS" xml:space="preserve">
+    <value>Serveur IIS local</value>
+  </data>
+  <data name="IISBindingSNIFlag" xml:space="preserve">
+    <value>IIS Binding SNI Ssl Flag sera mis à jour pour</value>
+  </data>
+  <data name="IISBindNeedsSite" xml:space="preserve">
+    <value>Le site IIS est requis pour lier le certificat à.</value>
+  </data>
+  <data name="IISBindPortUpdate" xml:space="preserve">
+    <value>Le port de liaison IIS sera mis à jour pour</value>
+  </data>
+  <data name="IISPort" xml:space="preserve">
+    <value>Port IIS à lier à:</value>
+  </data>
+  <data name="IISSettings" xml:space="preserve">
+    <value>Paramètres IIS</value>
+  </data>
+  <data name="IISSiteAtWebRootRenewal" xml:space="preserve">
+    <value>Le site IIS {0} avec la racine Web à {1} sera utilisé pour la réponse au défi lors du renouvellement.</value>
+  </data>
+  <data name="IISSiteChallange" xml:space="preserve">
+    <value>Le site IIS à {0} sera utilisé pour la réponse au défi.</value>
+  </data>
+  <data name="InitCertes" xml:space="preserve">
+    <value>Initialisation de Certes...</value>
+  </data>
+  <data name="IssueCertificate" xml:space="preserve">
+    <value>Émettre un certificat</value>
+  </data>
+  <data name="IssuedCertificateIISPort" xml:space="preserve">
+    <value>Le certificat émis sera lié au site IIS {0} sur le port {1}</value>
+  </data>
+  <data name="IssuingCertificate" xml:space="preserve">
+    <value>Délivrance du certificat...</value>
+  </data>
+  <data name="NewConfiguration" xml:space="preserve">
+    <value>Nouvelle configuration</value>
+  </data>
+  <data name="NewDomain" xml:space="preserve">
+    <value>Nouveau domaine:</value>
+  </data>
+  <data name="NoBindIIS" xml:space="preserve">
+    <value>Certificat non lié à un site IIS</value>
+  </data>
+  <data name="NoBindOnRenewal" xml:space="preserve">
+    <value>Le certificat ne sera pas lié à un site IIS lors du renouvellement.</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>&lt;Aucun&gt;</value>
+  </data>
+  <data name="NoRebind" xml:space="preserve">
+    <value>Cela ne dissociera pas le certificat du site IIS, mais ne le rétablira pas lors du renouvellement.</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>À l'arrêt</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>Sur</value>
+  </data>
+  <data name="Port0InUse" xml:space="preserve">
+    <value>PORT {0} UTILISÉ</value>
+  </data>
+  <data name="PortInUse" xml:space="preserve">
+    <value>PORT UTILISÉ</value>
+  </data>
+  <data name="PowerShell" xml:space="preserve">
+    <value>Script de base PowerShell</value>
+  </data>
+  <data name="PSExecPolicy" xml:space="preserve">
+    <value>Politique d'exécution de PowerShell:</value>
+  </data>
+  <data name="PSExecSetting" xml:space="preserve">
+    <value>La définition de la stratégie d'exécution de script PowerShell sera mise à jour pour</value>
+  </data>
+  <data name="PSExecUpdate" xml:space="preserve">
+    <value>L'exécution du script PowerShell sera mise à jour pour</value>
+  </data>
+  <data name="PSFilter" xml:space="preserve">
+    <value>Scripts PowerShell (*.ps1)|*.ps1|Tous les fichiers (*.*)|*.*</value>
+  </data>
+  <data name="PSScriptExecSetting" xml:space="preserve">
+    <value>La politique d'exécution de script PowerShell sera mise à jour pour</value>
+  </data>
+  <data name="PSScriptUpdate" xml:space="preserve">
+    <value>Le script PowerShell sera mis à jour pour</value>
+  </data>
+  <data name="PSScriptWillBeExecuted" xml:space="preserve">
+    <value>Le script PowerShell {0} sera exécuté après l'émission et/ou la liaison réussie du certificat</value>
+  </data>
+  <data name="ReadyIssue" xml:space="preserve">
+    <value>Certificat prêt à délivrer.</value>
+  </data>
+  <data name="ReadyRenew" xml:space="preserve">
+    <value>Certificat prêt à renouveler.</value>
+  </data>
+  <data name="ReadyUpdate" xml:space="preserve">
+    <value>Prêt à mettre à jour les paramètres.</value>
+  </data>
+  <data name="RecommendDelete" xml:space="preserve">
+    <value>Il est recommandé de révoquer et de supprimer d'abord le certificat.</value>
+  </data>
+  <data name="Registered" xml:space="preserve">
+    <value>INSCRIT</value>
+  </data>
+  <data name="RegisteringNewAccount" xml:space="preserve">
+    <value>Enregistrement d'un nouveau compte...</value>
+  </data>
+  <data name="RegisteringNewOrder" xml:space="preserve">
+    <value>Enregistrement d'une nouvelle commande et vérification...</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="RemovingCertificate" xml:space="preserve">
+    <value>Suppression du certificat de la configuration...</value>
+  </data>
+  <data name="RemovingTemp" xml:space="preserve">
+    <value>Suppression des fichiers temporaires...</value>
+  </data>
+  <data name="RenewalDelay" xml:space="preserve">
+    <value>Jours de renouvellement avant l'expiration:</value>
+  </data>
+  <data name="RenewCertificate" xml:space="preserve">
+    <value>Renouveler le certificat</value>
+  </data>
+  <data name="RetrievingCertificate" xml:space="preserve">
+    <value>Récupération du certificat...</value>
+  </data>
+  <data name="RevokeCertificate" xml:space="preserve">
+    <value>Révoquer le certificat</value>
+  </data>
+  <data name="RevokingCertificate" xml:space="preserve">
+    <value>Révocation du certificat avec le service ACME...</value>
+  </data>
+  <data name="ScheduledTask" xml:space="preserve">
+    <value>Tâche planifiée</value>
+  </data>
+  <data name="ScheduleTaskAuto" xml:space="preserve">
+    <value>Planifier une tâche à renouveler automatiquement</value>
+  </data>
+  <data name="Server" xml:space="preserve">
+    <value>Serveur:</value>
+  </data>
+  <data name="ServerPort" xml:space="preserve">
+    <value>Port de serveur:</value>
+  </data>
+  <data name="Service" xml:space="preserve">
+    <value>Service:</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Paramètres</value>
+  </data>
+  <data name="SettingsUpdated" xml:space="preserve">
+    <value>Paramètres mis à jour.</value>
+  </data>
+  <data name="ShowCertificate" xml:space="preserve">
+    <value>Afficher le certificat</value>
+  </data>
+  <data name="SiteBindings" xml:space="preserve">
+    <value>Liens du site:</value>
+  </data>
+  <data name="SNI" xml:space="preserve">
+    <value>Indication du nom du serveur</value>
+  </data>
+  <data name="Standalone" xml:space="preserve">
+    <value>Serveur HTTP autonome</value>
+  </data>
+  <data name="StandaloneRequiresPort" xml:space="preserve">
+    <value>Le serveur HTTP autonome nécessite un port qui n'est pas utilisé.</value>
+  </data>
+  <data name="StandaloneSettings" xml:space="preserve">
+    <value>Paramètres du serveur HTTP autonome</value>
+  </data>
+  <data name="StandaloneUsedResponseOnPort" xml:space="preserve">
+    <value>Un serveur HTTP autonome sur le port {0} sera utilisé pour la réponse au défi.</value>
+  </data>
+  <data name="StandaloneWarning" xml:space="preserve">
+    <value>Tous les défis sont traités sur le port 80, si vous utilisez un autre port ci-dessus, vous devez définir la redirection de port sur votre routeur en conséquence.</value>
+  </data>
+  <data name="StoringCertificate" xml:space="preserve">
+    <value>Stockage du certificat...</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Succès</value>
+  </data>
+  <data name="SuccessBindIIS" xml:space="preserve">
+    <value>Certificat lié avec succès pour le site IIS:</value>
+  </data>
+  <data name="SuccessCertBoundIIS" xml:space="preserve">
+    <value>Le certificat a rebondi avec succès sur le site IIS.</value>
+  </data>
+  <data name="TaskCreatedDaysBefore" xml:space="preserve">
+    <value>Une tâche planifiée sera créée pour s'assurer que le certificat est renouvelé dans les {0} de son expiration.</value>
+  </data>
+  <data name="TaskWillBeCreated" xml:space="preserve">
+    <value>Une tâche sera planifiée pour renouveler automatiquement le certificat.</value>
+  </data>
+  <data name="TaskWillBeDeleted" xml:space="preserve">
+    <value>La tâche planifiée sera supprimée afin que le certificat ne soit pas renouvelé automatiquement.</value>
+  </data>
+  <data name="UpdateIISSetting" xml:space="preserve">
+    <value>Mettre à jour les paramètres IIS</value>
+  </data>
+  <data name="UpdateSettings" xml:space="preserve">
+    <value>Mettre à jour les paramètres</value>
+  </data>
+  <data name="UpdatingSettings" xml:space="preserve">
+    <value>Mise à jour des paramètres...</value>
+  </data>
+  <data name="ValidEmail" xml:space="preserve">
+    <value>Un e-mail valide est requis.</value>
+  </data>
+  <data name="ValidService" xml:space="preserve">
+    <value>Une adresse de service valide est requise.</value>
+  </data>
+  <data name="VerifiedCleaningUp" xml:space="preserve">
+    <value>Vérifié, nettoyage...</value>
+  </data>
+  <data name="WebRootChallange" xml:space="preserve">
+    <value>Racine Web pour le défi:</value>
+  </data>
+  <data name="WinCertes" xml:space="preserve">
+    <value>WinCertes</value>
+  </data>
+  <data name="WithPSExecPolicy" xml:space="preserve">
+    <value>avec la règle d'exécution définie sur</value>
+  </data>
+  <data name="WithSNI" xml:space="preserve">
+    <value>avec le drapeau SNI Ssl allumé.</value>
+  </data>
+  <data name="WritingConfiguration" xml:space="preserve">
+    <value>Écriture de la nouvelle configuration...</value>
+  </data>
+  <data name="WritingSettings" xml:space="preserve">
+    <value>Écriture des paramètres dans la configuration...</value>
+  </data>
+</root>

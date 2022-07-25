@@ -69,12 +69,12 @@ namespace WinCertes.Config
                 }
                 catch (Exception e)
                 {
-                    _logger.Warn(e, $"Warning: Could not open/create registry subkey: {e.Message}. We'll try to continue anyway.");
+                    _logger.Warn(e, string.Format(Resources.RegistryConfig.ErrorRegistry, e.Message));
                 }
             }
             else
             {
-                _logger.Warn($"Warning: Not running on Windows so currently can't store the Configuration in the Registry, We'll try to continue anyway.");
+                _logger.Warn(Resources.RegistryConfig.ErrorNoWindows);
             }
         }
 

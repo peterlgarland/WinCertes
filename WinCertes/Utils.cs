@@ -123,12 +123,12 @@ namespace WinCertes
 
                 // and we invoke it
                 var results = pipeline.Invoke();
-                _logger.Info($"Executed script {scriptFile}.");
+                _logger.Info($"{Resources.Utils.ExecScript} {scriptFile}.");
                 return true;
             }
             catch (Exception e)
             {
-                _logger.Error($"Could not execute {scriptFile}: {e.Message}");
+                _logger.Error($"{Resources.Utils.ErrorExecScript} {scriptFile}: {e.Message}");
                 return false;
             }
         }
@@ -161,7 +161,7 @@ namespace WinCertes
             File.Delete(pfx.PfxFullPath);
             File.Delete(pfx.PemCertPath);
             File.Delete(pfx.PemKeyPath);
-            _logger.Info($"Removed files from filesystem: {pfx.PfxFullPath}, {pfx.PemCertPath}, {pfx.PemKeyPath}");
+            _logger.Info($"{Resources.Utils.DeletedFiles} {pfx.PfxFullPath}, {pfx.PemCertPath}, {pfx.PemKeyPath}");
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace WinCertes
                 Site site = serverMgr.Sites[siteName];
                 if (site == null)
                 {
-                    _logger.Error($"Could not find IIS site {siteName}");
+                    _logger.Error($"{Resources.Utils.ErrorIISFind} {siteName}");
                     return false;
                 }
                 // Use whether they want SNI on, rather than it not being on Port 0 = 443
@@ -232,7 +232,7 @@ namespace WinCertes
                                 binding.CertificateHash = certificate.GetCertHash();
                                 binding.CertificateStoreName = "MY";
                                 foundBinding = true;
-                                _logger.Debug("Found binding by port for site: " + siteName + " Will update it with cert with serial: " + certificate.SerialNumber);
+                                _logger.Debug(string.Format(Resources.Utils.IISFoundBindSiteNameSerial, siteName, certificate.SerialNumber));
                             }
                         }
                     }
@@ -243,7 +243,7 @@ namespace WinCertes
                         // This is technically not necessary, but seems it doesn't always put the Hash on the binding without this extra confirmation!
                         binding.CertificateHash = certificate.GetCertHash();
                         binding.CertificateStoreName = "MY";
-                        _logger.Debug("Could not find binding, will try to create one on port " + port);
+                        _logger.Debug(Resources.Utils.IISNoFoundBindNewPort + port);
                     }
                 }
                 else
@@ -260,7 +260,7 @@ namespace WinCertes
                                     binding.CertificateHash = certificate.GetCertHash();
                                     binding.CertificateStoreName = "MY";
                                     foundBinding = true;
-                                    _logger.Debug("Found binding by hostname for site: " + siteName + " Will update it with cert with serial: " + certificate.SerialNumber);
+                                    _logger.Debug(string.Format(Resources.Utils.IISFoundBindSiteNameSerial, siteName, certificate.SerialNumber));
                                 }
                             }
                         }
@@ -273,7 +273,7 @@ namespace WinCertes
                             binding.CertificateHash = certificate.GetCertHash();
                             binding.SslFlags = SslFlags.Sni;
                             binding.CertificateStoreName = "MY";
-                            _logger.Debug("Could not find binding, will try to create one on port 443");
+                            _logger.Debug(Resources.Utils.IISNoFoundBindNewPort + "443");
                         }
                     }
                 }
@@ -286,7 +286,7 @@ namespace WinCertes
             }
             catch (Exception e)
             {
-                _logger.Error(e, $"Could not bind certificate to site {siteName}: {e.Message}");
+                _logger.Error(e, $"{Resources.Utils.ErrorIISBind} {siteName}: {e.Message}");
                 return false;
             }
         }
@@ -377,7 +377,7 @@ namespace WinCertes
                 {
                     // Create a new task definition and assign properties
                     TS.TaskDefinition td = ts.NewTask();
-                    td.RegistrationInfo.Description = "Manages certificate using ACME";
+                    td.RegistrationInfo.Description = Resources.Utils.Description;
 
                     // We need to run as SYSTEM user
                     td.Principal.UserId = @"NT AUTHORITY\SYSTEM";
@@ -394,11 +394,11 @@ namespace WinCertes
                     // Register the task in the root folder
                     ts.RootFolder.RegisterTaskDefinition($"WinCertes - {taskName}", td);
                 }
-                _logger.Info($"Scheduled Task \"WinCertes - {taskName}\" created successfully");
+                _logger.Info(string.Format(Resources.Utils.SuccessTask, taskName));
             }
             catch (Exception e)
             {
-                _logger.Error("Unable to create Scheduled Task" + e.Message);
+                _logger.Error(Resources.Utils.ErrorTask + e.Message);
             }
         }
 
@@ -431,7 +431,7 @@ namespace WinCertes
             }
             catch (Exception e)
             {
-                _logger.Error("Unable to read Scheduled Task status" + e.Message);
+                _logger.Error(Resources.Utils.ErrorTaskStatus + e.Message);
                 return false;
             }
         }
@@ -466,7 +466,7 @@ namespace WinCertes
             }
             catch (Exception e)
             {
-                _logger.Error("Unable to read Scheduled Task status" + e.Message);
+                _logger.Error(Resources.Utils.ErrorTaskStatus + e.Message);
             }
         }
 
@@ -570,7 +570,7 @@ namespace WinCertes
             }
             catch (Exception e)
             {
-                _logger.Error($"Could not retrieve certificate from store: {e.Message}");
+                _logger.Error($"{Resources.Utils.ErrorCertificate} {e.Message}");
                 return null;
             }
         }
@@ -598,7 +598,7 @@ namespace WinCertes
             }
             catch (Exception e)
             {
-                _logger.Error($"Could not generate new key pair: {e.Message}");
+                _logger.Error($"{Resources.Utils.ErrorKeyPair} {e.Message}");
                 return null;
             }
         }
