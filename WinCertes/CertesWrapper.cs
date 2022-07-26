@@ -205,7 +205,12 @@ namespace WinCertes
                 {
                     _logger.Debug($"{Resources.CertesWrapper.InitDNS} {res.Identifier.Value}");
                     var resValidation = await ValidateDNSChallenge(res.Identifier.Value, dnsChallenge, dnsChallengeValidator);
-                    if (!resValidation) throw new Exception($"{Resources.CertesWrapper.NoDNSChallenge}\n {dnsChallenge.Resource().Result.Error.Detail}");
+                    if (!resValidation)
+                    {
+                        if (dnsChallenge.Resource().Result.Error != null)
+                            throw new Exception($"{Resources.CertesWrapper.NoDNSChallenge}\n {dnsChallenge.Resource().Result.Error.Detail}");
+                        else throw new Exception(Resources.CertesWrapper.NoDNSChallenge);
+                    }
                 }
                 else throw new Exception(Resources.CertesWrapper.ErrorDNS);
             }

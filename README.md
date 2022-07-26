@@ -85,7 +85,7 @@ Command Line Options
                                to handle certificate renewal (default=no)
   -b, --bindname=VALUE       IIS site name to bind the certificate to, e.g. "
                                Default Web Site". Defaults to no binding.
-  -n, --bindport=N           IIS site port to bind the certificate to, e.g. 443. 
+  -n, --bindport=VALUE       IIS site port to bind the certificate to, e.g. 443. 
                                Defaults to 443, used only if -b is specified.
   -i, --sni                  add the Server Name Indicatation Ssl Flag when
                                binding to IIS
@@ -241,11 +241,11 @@ If you have a bug or feature and you can fix the problem yourself please just:
    
 If you cannot provide a fix for the problem yourself, please file an issue and describe the fault with steps to reproduce.
 
-The development requires Visual Studio 2017 or 2019, and Wix if you want to build the installer.
+The development requires Visual Studio 2017 or 2019 or 2022, and Wix if you want to build the installer.
 
 
 
-This project is (c) 2018-2019 Alexandre Aufrere
+This project is (c) 2018-2022 Alexandre Aufrere
 GUI is (c) 2021 Peter Luke Garland
 
 Released under the terms of GPLv3

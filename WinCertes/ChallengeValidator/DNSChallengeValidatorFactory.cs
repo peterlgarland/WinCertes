@@ -32,6 +32,10 @@ namespace WinCertes.ChallengeValidator
             {
                 challengeValidator = new DNSChallengeAWSValidator(config);
             }
+            if (config.ReadStringParameter("DNSValidatorType") == "ps")
+            {
+                challengeValidator = new DNSChallengePowerShellValidator(config);
+            }
             return challengeValidator;
         }
     }
