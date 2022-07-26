@@ -5,7 +5,7 @@ WinCertes is a simple ACMEv2 Client for Windows, able to manage the automatic is
 ![GPLv3 License](https://www.gnu.org/graphics/gplv3-88x31.png)
 
 Requirements:
-- Windows with .NET 5.0 Runtime and .NET 5.0 Desktop Runtime for GUI, 64-bit (x64)
+- Windows with .NET 6.0 Runtime and .NET 6.0 Desktop Runtime for GUI, 64-bit (x64)
 
 Features:
 - CLI-based for easy integration with DevOps
