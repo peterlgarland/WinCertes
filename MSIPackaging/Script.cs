@@ -11,7 +11,7 @@ namespace MSIPackaging
     {
         static public void Main(string[] args)
         {
-            var version = "1.6.0";
+            var version = "1.7.0";
 
 #if DEBUG
             if (System.IO.File.Exists("WinCertes-Debug." + version + "-pre.msi")) System.IO.File.Delete("WinCertes-Debug." + version + "-pre.msi");
@@ -28,17 +28,17 @@ namespace MSIPackaging
             var project = new Project("WinCertes",
                   new Dir(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + @"\WinCertes",
 #if DEBUG
-                                  new WixSharp.File(path + @"\WinCertes\bin\Debug\net5.0-windows\WinCertes.exe")
+                                  new WixSharp.File(path + @"\WinCertes\bin\Debug\net7.0-windows\WinCertes.exe")
                                   {
                                       Shortcuts = new[] { new FileShortcut("WinCertes", "ProgramMenuFolder") }
                                   },
-                                  new Files(path + @"\WinCertes\bin\Debug\net6.0-windows\*.*", (f) => !f.EndsWith(".exe"))
+                                  new Files(path + @"\WinCertes\bin\Debug\net7.0-windows\*.*", (f) => !f.EndsWith(".exe"))
 #else
-                                  new WixSharp.File(path + @"\WinCertes\bin\Release\net6.0-windows\WinCertes.exe")
+                                  new WixSharp.File(path + @"\WinCertes\bin\Release\net7.0-windows\WinCertes.exe")
                                   {
                                       Shortcuts = new[] { new FileShortcut("WinCertes", "ProgramMenuFolder") }
                                   },
-                                  new Files(path + @"\WinCertes\bin\Release\net6.0-windows\*.*", (f) => !f.EndsWith("WinCertes.exe"))
+                                  new Files(path + @"\WinCertes\bin\Release\net7.0-windows\*.*", (f) => !f.EndsWith("WinCertes.exe"))
 #endif
                                   ),
                   new RegValue(WixSharp.RegistryHive.LocalMachine, @"Software\WinCertes", "license", "GPLv3") { Win64 = true },

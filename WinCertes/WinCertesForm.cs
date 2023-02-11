@@ -55,6 +55,7 @@ namespace WinCertes
             tabPage2.Text = Resources.WinCertesForm.IISSettings;
             tabPage3.Text = Resources.WinCertesForm.Domains;
             tabPage4.Text = Resources.WinCertesForm.Extra;
+            tabPage5.Text = Resources.WinCertesForm.Help;
             certButton.Text = Resources.WinCertesForm.ShowCertificate;
             revokeButton.Text = Resources.WinCertesForm.RevokeCertificate;
             configLabel.Text = Resources.WinCertesForm.Configuration;
@@ -62,6 +63,7 @@ namespace WinCertes
             settingsGroupBox.Text = Resources.WinCertesForm.Settings;
             deleteButton.Text = Resources.WinCertesForm.Delete;
             emailLabel.Text = Resources.WinCertesForm.Email;
+            serverLabel.Text = Resources.WinCertesForm.Server;
             serviceLabel.Text = Resources.WinCertesForm.Service;
             standaloneRadioButton.Text = Resources.WinCertesForm.Standalone;
             iisRadioButton.Text = Resources.WinCertesForm.IIS;
@@ -86,6 +88,8 @@ namespace WinCertes
             renewLabel.Text = Resources.WinCertesForm.RenewalDelay;
             psScriptCheckBox.Text = Resources.WinCertesForm.ExecutePS;
             psExecCheckBox.Text = Resources.WinCertesForm.PSExecPolicy;
+            browseButton.Text = Resources.WinCertesForm.Browse;
+            helpTextBox.Text = Resources.WinCertesForm.HelpText;
         }
 
 
@@ -396,7 +400,7 @@ namespace WinCertes
             Sites = Utils.GetIISSites();
             sitesListBox.Items.Clear();
 
-            if (Sites == null || Sites.Count == 0)
+            if (Sites == null || Sites?.Count == 0)
             {
                 iisGroupBox.Enabled = false;
                 iisRadioButton.Enabled = false;

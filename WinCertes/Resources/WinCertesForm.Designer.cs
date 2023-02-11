@@ -19,7 +19,7 @@ namespace WinCertes.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class WinCertesForm {
@@ -340,7 +340,7 @@ namespace WinCertes.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Domains*.
+        ///   Looks up a localized string similar to Domains.
         /// </summary>
         internal static string Domains {
             get {
@@ -358,7 +358,7 @@ namespace WinCertes.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to e-mail*:.
+        ///   Looks up a localized string similar to e-mail:.
         /// </summary>
         internal static string Email {
             get {
@@ -482,18 +482,16 @@ namespace WinCertes.Resources {
                 return ResourceManager.GetString("ExecutingPS", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Extra.
         /// </summary>
-        internal static string Extra
-        {
-            get
-            {
+        internal static string Extra {
+            get {
                 return ResourceManager.GetString("Extra", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Extra Configuration:.
         /// </summary>
@@ -547,18 +545,16 @@ namespace WinCertes.Resources {
                 return ResourceManager.GetString("GettingHTTPValidator", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Help.
         /// </summary>
-        internal static string Help
-        {
-            get
-            {
+        internal static string Help {
+            get {
                 return ResourceManager.GetString("Help", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to WinCertes allows you to generate a free certificate using Lets Encrypt or a service of your choice.
         ///You must start by entering the e-mail address you will be registering the certificate with.

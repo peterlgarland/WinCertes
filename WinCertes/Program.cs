@@ -155,6 +155,7 @@ namespace WinCertes
         static int Main(string[] args)
         {
 #if DEBUG
+            // Change to the culture you are translating into.
             //CultureInfo culture = CultureInfo.CreateSpecificCulture("fr-FR");
             //CultureInfo.DefaultThreadCurrentCulture = culture;
             //CultureInfo.DefaultThreadCurrentUICulture = culture;

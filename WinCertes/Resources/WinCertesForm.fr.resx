@@ -521,6 +521,10 @@ En cas de problème, veuillez signaler le problème au référentiel peterlgarla
   <data name="WinCertes" xml:space="preserve">
     <value>WinCertes</value>
   </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="WinCertesForm.fr" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>wincertesform.fr.resx;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="WithPSExecPolicy" xml:space="preserve">
     <value>avec la règle d'exécution définie sur</value>
   </data>

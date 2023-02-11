@@ -5,7 +5,7 @@ WinCertes is a simple ACMEv2 Client for Windows, able to manage the automatic is
 ![GPLv3 License](https://www.gnu.org/graphics/gplv3-88x31.png)
 
 Requirements:
-- Windows with .NET 6.0 Runtime and .NET 6.0 Desktop Runtime for GUI, 64-bit (x64)
+- Windows with .NET 7.0 Runtime and .NET 7.0 Desktop Runtime for GUI, 64-bit (x64 / arm64)
 
 Features:
 - CLI-based for easy integration with DevOps
@@ -24,7 +24,7 @@ Features:
 	- Support for AWS Route53
 - Import of certificate and key into chosen CSP/KSP, enabling compatibility with HSMs
 - Support of any ACMEv2 compliant CA, including Let's Encrypt and Let's Encrypt Staging (for tests/dry-run)
-- Windows Installer for easy deployment, but you must have .NET 5.0 Runtime installed
+- Windows Installer for easy deployment, but you must have .NET 7.0 Desktop Runtime installed
 - GUI option for super easy use
    - Currently limited to HTTP Validation via IIS or the Standalone Http Challenge Server
    - Ability to rebind Certificate to an IIS Site
@@ -246,7 +246,7 @@ The development requires Visual Studio 2017 or 2019 or 2022, and Wix if you want
 
 
 This project is (c) 2018-2022 Alexandre Aufrere
-GUI is (c) 2021 Peter Luke Garland
+GUI is (c) 2021-2023 Peter Luke Garland
 
 Released under the terms of GPLv3
 
