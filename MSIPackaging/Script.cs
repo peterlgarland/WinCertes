@@ -28,17 +28,17 @@ namespace MSIPackaging
             var project = new Project("WinCertes",
                   new Dir(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + @"\WinCertes",
 #if DEBUG
-                                  new WixSharp.File(path + @"\WinCertes\bin\Debug\net7.0-windows\WinCertes.exe")
+                                  new WixSharp.File(path + @"\WinCertes\bin\x64\Debug\net7.0-windows\WinCertes.exe")
                                   {
                                       Shortcuts = new[] { new FileShortcut("WinCertes", "ProgramMenuFolder") }
                                   },
-                                  new Files(path + @"\WinCertes\bin\Debug\net7.0-windows\*.*", (f) => !f.EndsWith(".exe"))
+                                  new Files(path + @"\WinCertes\bin\x64\Debug\net7.0-windows\*.*", (f) => !f.EndsWith(".exe"))
 #else
-                                  new WixSharp.File(path + @"\WinCertes\bin\Release\net7.0-windows\WinCertes.exe")
+                                  new WixSharp.File(path + @"\WinCertes\bin\x64\Release\net7.0-windows\WinCertes.exe")
                                   {
                                       Shortcuts = new[] { new FileShortcut("WinCertes", "ProgramMenuFolder") }
                                   },
-                                  new Files(path + @"\WinCertes\bin\Release\net7.0-windows\*.*", (f) => !f.EndsWith("WinCertes.exe"))
+                                  new Files(path + @"\WinCertes\bin\x64\Release\net7.0-windows\*.*", (f) => !f.EndsWith("WinCertes.exe"))
 #endif
                                   ),
                   new RegValue(WixSharp.RegistryHive.LocalMachine, @"Software\WinCertes", "license", "GPLv3") { Win64 = true },

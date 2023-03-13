@@ -14,6 +14,7 @@
 		<DisableWinExeOutputInference>true</DisableWinExeOutputInference>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Platforms>x64</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>
