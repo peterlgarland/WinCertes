@@ -561,7 +561,8 @@ namespace WinCertes
                         }
                         else
                         {
-                            bindingsListBox.Items.Add($"{bind.Protocol}://{(string.IsNullOrEmpty(bind.Host) ? "*" : bind.Host)}:{bind.EndPoint.Port}{virtualRoot.Path} {(bind.SslFlags == SslFlags.Sni ? "(SNI)" : "")}");
+                            if (bind.Protocol == "https")
+                                bindingsListBox.Items.Add($"{bind.Protocol}://{(string.IsNullOrEmpty(bind.Host) ? "*" : bind.Host)}:{bind.EndPoint.Port}{virtualRoot.Path} {(bind.SslFlags == SslFlags.Sni ? "(SNI)" : "")}");
                         }
                     }
                     catch (ArgumentException err)

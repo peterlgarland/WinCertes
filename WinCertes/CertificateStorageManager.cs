@@ -38,7 +38,8 @@ namespace WinCertes
                     _logger.Debug(Resources.CertificateStorageManager.NotImportingCSP);
                     flags = X509KeyStorageFlags.DefaultKeySet | X509KeyStorageFlags.Exportable; 
                 }
-                Certificate = new X509Certificate2(AuthenticatedPFX.PfxFullPath, AuthenticatedPFX.PfxPassword, flags);
+                Certificate = X509CertificateLoader.LoadPkcs12FromFile(AuthenticatedPFX.PfxFullPath, AuthenticatedPFX.PfxPassword, flags);
+                //Certificate = new X509Certificate2(AuthenticatedPFX.PfxFullPath, AuthenticatedPFX.PfxPassword, flags);
             } catch (Exception e) {
                 _logger.Error($"{Resources.CertificateStorageManager.ErrorExtractingPFX} {e.Message}");
             }
@@ -60,7 +61,8 @@ namespace WinCertes
                 try {
                     X509Certificate2Collection certCol = new X509Certificate2Collection();
                     X509KeyStorageFlags flags = X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet;
-                    certCol.Import(AuthenticatedPFX.PfxFullPath, AuthenticatedPFX.PfxPassword, flags);
+                    certCol.Add(X509CertificateLoader.LoadPkcs12FromFile(AuthenticatedPFX.PfxFullPath, AuthenticatedPFX.PfxPassword, flags));
+//                    certCol.Import(AuthenticatedPFX.PfxFullPath, AuthenticatedPFX.PfxPassword, flags);
                     foreach (X509Certificate2 certFile in certCol) {
                         if (certFile.Equals(Certificate)) continue;
                         store = new X509Store(StoreName.CertificateAuthority, StoreLocation.LocalMachine);
